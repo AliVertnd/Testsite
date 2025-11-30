@@ -1,0 +1,2259 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Impro Digital — unified phase 1 &amp; 1.5 demo</title>
+  <meta name="color-scheme" content="dark">
+  <!--
+    Объединённый мини‑сайт демонстрирует две фазы анимации — исходную сцену
+    «Impro Digital» с кластеризацией частиц и её продолжение, в котором
+    частицы собираются в пять колец. Вы можете прокрутить страницу, чтобы
+    увидеть плавный переход между сценами. Оба эффекта используют
+    одинаковые цвета и стили, чтобы ощущалась непрерывность.
+  -->
+  <style>
+    /* Базовые цвета и типографика, используемые в обеих сценах */
+    :root {
+      --impro-bg: #0b0e12; /* общий фон — чуть светлее, чем в исходных файлах */
+      --impro-fg: #e9edf2;
+      --impro-accent: #00ff00; /* фирменный зелёный Impro */
+      --impro-line: rgba(230, 230, 230, 0.35);
+      --impro-dot: rgba(255, 255, 255, 0.85);
+    }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--impro-bg);
+      color: var(--impro-fg);
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      scroll-behavior: smooth;
+    }
+    /* Обёртка для добавления прокрутки. Высота примерно 200vh позволяет
+       плавно пройти через обе фазы. */
+    .page {
+      position: relative;
+      min-height: 300vh; /* three screens: clusters, rings, DNA */
+    }
+    /* Общий контейнер для анимаций. Сцены фиксированы и занимают всё окно. */
+    .scene {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      pointer-events: none;
+      /* Скрываем исходные сцены: они по‑прежнему обновляются, но не видны.
+         Анимация перехода теперь контролируется скроллом в отдельном холсте. */
+      opacity: 0;
+      transition: none;
+    }
+    /* Первый слой (кластеризация) наследует стиль из исходного кода. */
+    .scene1__canvas {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: var(--impro-bg);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .scene1__content {
+      position: relative;
+      min-height: 600vh; /* достаточная высота для работы скролла из первой версии */
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+    }
+    .scene1__copy {
+      position: sticky;
+      top: 18vh;
+      max-width: min(680px, 90vw);
+      margin-left: clamp(10vw, 18vw, 22vw);
+      padding-bottom: 10vh;
+    }
+    .scene1__title {
+      font-size: clamp(3rem, 4vw + 1rem, 5rem);
+      letter-spacing: -0.01em;
+      margin: 0 0 0.35em;
+    }
+    .scene1__lede {
+      font-size: clamp(1.2rem, 1.2vw + 1rem, 1.8rem);
+      margin: 0 0 1.2em;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.82);
+    }
+    .scene1__note {
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.45);
+      margin: 0;
+    }
+    @media (max-width: 768px) {
+      .scene1__content {
+        min-height: 520vh;
+      }
+      .scene1__copy {
+        margin-left: 8vw;
+        top: 14vh;
+      }
+    }
+    /* Второй слой (кольца). Позиционируем элементы поверх canvas. */
+    .scene2__canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      background: var(--impro-bg);
+      z-index: 1;
+    }
+    .scene2__links {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 8; /* above unified-canvas */
+      font: 14px/1.2 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .scene2__links a {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--impro-fg);
+      text-decoration: none;
+      background: rgba(20, 24, 28, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+      transition: box-shadow .24s ease, opacity .24s ease, transform .24s ease;
+      pointer-events: auto;
+      opacity: 0;
+    }
+    .scene2__links a:hover {
+      box-shadow: 0 0 0 3px rgba(0, 255, 0, 0.28);
+    }
+    .scene2__hint {
+      position: fixed;
+      left: 12px;
+      bottom: 12px;
+      z-index: 4;
+      font: 12px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: rgba(233, 237, 242, 0.75);
+    }
+
+    /* Overlay for ring directions with title and services */
+    .ring-overlay{
+      position: fixed;
+      inset: 0;
+      z-index: 7;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: clamp(8vw, 12vw, 18vw);
+      padding-top: 6vh;
+      transition: opacity .35s ease, transform .35s ease;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    .ring-overlay.is-visible{
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .ring-overlay__kicker{
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(233,237,242,.55);
+      margin-bottom: 8px;
+    }
+    .ring-overlay__title{
+      font-size: clamp(30px, 3vw, 44px);
+      margin: 0 0 10px;
+      letter-spacing: -0.01em;
+    }
+    .ring-overlay__list{
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: clamp(15px, 1.2vw, 18px);
+      line-height: 1.55;
+      color: rgba(233,237,242,.88);
+    }
+    .ring-overlay__list li{
+      margin: 2px 0;
+    }
+    @media (max-width: 768px){
+      .ring-overlay{
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0 6vw 10vh;
+        text-align: center;
+        background: radial-gradient(60% 60% at 50% 100%, rgba(11,14,18,.85), rgba(11,14,18,0));
+      }
+      .ring-overlay__title{ font-size: 26px; }
+      .ring-overlay__list{ font-size: 15px; }
+    }
+
+    /* Дополнительный холст, в который будет рисоваться объединённый эффект.
+       Размещён поверх остальных слоёв и не перехватывает события. */
+    .unified-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      background: var(--impro-bg);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* Холст для отображения 3D‑спирали ДНК. Он располагается поверх
+       unified‑canvas и постепенно появляется после завершения сборки колец.
+       Начальная прозрачность равна нулю, opacity управляется скриптом. */
+    .dna-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 6;
+      transition: opacity 0.8s ease;
+    }
+  </style>
+
+  <style>
+    /* === Ring overlay bottom panel override (safe, does not touch canvases) === */
+    .ring-overlay{
+      position: fixed;
+      left: 50% !important;
+      right: auto !important;
+      top: auto !important;
+      bottom: clamp(16px, 4vh, 40px) !important;
+      transform: translate3d(-50%, 12px, 0) !important;
+      width: min(1100px, 92vw) !important;
+      max-height: 42vh !important;
+      overflow: auto !important;
+      z-index: 9 !important;
+      pointer-events: none;
+      display: grid !important;
+      grid-template-columns: clamp(180px, 22vw, 280px) 1fr !important;
+      grid-template-rows: auto auto !important;
+      grid-template-areas:
+        "kicker list"
+        "title  list" !important;
+      column-gap: 24px !important;
+      row-gap: 6px !important;
+      padding: clamp(14px, 2.2vh, 22px) clamp(16px, 2.4vw, 26px) !important;
+      background: rgba(22, 24, 28, 0.96) !important;
+      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      border-radius: 18px !important;
+      box-shadow: 0 14px 48px rgba(0,0,0,0.55) !important;
+      transition: opacity .25s ease, transform .25s ease !important;
+      opacity: 0;
+    }
+    .ring-overlay.is-visible{
+      opacity: 1;
+      transform: translate3d(-50%, 0, 0) !important;
+      pointer-events: auto;
+    }
+    .ring-overlay__kicker{
+      grid-area: kicker !important;
+      font: 12px/1.3 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
+      letter-spacing: .14em !important;
+      text-transform: uppercase !important;
+      color: rgba(233,237,242,0.75) !important;
+      margin-bottom: 2px !important;
+    }
+    .ring-overlay__title{
+      grid-area: title !important;
+      font: 700 clamp(26px, 3.2vw, 40px)/1.05 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
+      color: #e9edf2 !important;
+      margin: 0 !important;
+    }
+    .ring-overlay__list{
+      grid-area: list !important;
+      margin: 0 !important;
+      padding: 0 0 0 18px !important;
+      list-style: disc !important;
+      font: 400 clamp(15px, 1.45vw, 18px)/1.55 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
+      color: rgba(233,237,242,0.92) !important;
+    }
+    .ring-overlay__list li{ margin: 3px 0 !important; }
+
+    @media (max-width: 768px){
+      .ring-overlay{
+        left: 50% !important;
+        bottom: 12px !important;
+        width: 94vw !important;
+        max-height: 55vh !important;
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto auto auto !important;
+        grid-template-areas:
+          "kicker"
+          "title"
+          "list" !important;
+        text-align: left !important;
+        padding: 14px 16px !important;
+      }
+      .ring-overlay__title{ font-size: 26px !important; }
+      .ring-overlay__list{ font-size: 15px !important; }
+    }
+  </style>
+
+</head>
+<body>
+  <!-- Контейнер, обеспечивающий пространство для прокрутки. -->
+  <div class="page">
+    <!-- Сцена 1: исходные кластеры Impro Digital -->
+    <div id="scene1" class="scene">
+      <canvas class="scene1__canvas" data-impro-scene-canvas aria-hidden="true"></canvas>
+      <div class="scene1__content">
+        <div class="scene1__copy">
+          <h1 class="scene1__title">Impro Digital</h1>
+          <p class="scene1__lede">Hyper‑personalized brand experiences engineered to convert.</p>
+          <p class="scene1__note">Scroll to explore the Impro continuum. The background and particles adapt dynamically.</p>
+        </div>
+      </div>
+    </div>
+    <!-- Сцена 2: пять трёхмерных колец -->
+    <div id="scene2" class="scene" style="opacity:0">
+      <canvas class="scene2__canvas" aria-hidden="true"></canvas>
+      <div class="scene2__links" data-link-layer></div>
+      <div class="scene2__hint">Фаза 1.5 — перемещайте курсор. Кликабельные метки появятся, когда кольца соберутся.</div>
+    </div>
+
+    <!-- Холст для объединённого эффекта: отображает плавное преобразование частиц
+         от структуры фазы 1 к кольцам фазы 1.5 по мере прокрутки. -->
+    <canvas id="unified-canvas" class="unified-canvas" aria-hidden="true"></canvas>
+
+    <!--
+      Холст для отображения фазы 2 (ДНК). Изначально скрыт (opacity=0).
+      Его содержимое создаёт модуль three.js, импортированный ниже.
+    -->
+    <canvas id="dnaCanvas" class="dna-canvas" aria-hidden="true"></canvas>
+
+    <!-- Overlay for ring directions; initially hidden -->
+    <div class="ring-overlay" aria-hidden="false">
+      <div class="ring-overlay__kicker">Направление</div>
+      <h2 class="ring-overlay__title">Перфоманс</h2>
+      <ul class="ring-overlay__list">
+        <li>Контекст + таргет</li>
+        <li>Медиаплан и гипотезы</li>
+        <li>Креативы под конверсию</li>
+        <li>Оптимизация CPL/CPA</li>
+        <li>ROMI и сквозная аналитика</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Скрипты: импортированы и слегка адаптированы две исходные реализации. -->
+  <script>
+  // ===== Фаза 1: исходные кластеры Impro Digital =====
+  (function (window, document) {
+    "use strict";
+    const COLORS = {
+      background: getComputedStyle(document.documentElement).getPropertyValue('--impro-bg').trim() || '#1a1a1a',
+      accent: getComputedStyle(document.documentElement).getPropertyValue('--impro-accent').trim() || '#00ff00',
+      line: getComputedStyle(document.documentElement).getPropertyValue('--impro-line').trim() || 'rgba(230,230,230,0.32)',
+      particle: getComputedStyle(document.documentElement).getPropertyValue('--impro-dot').trim() || 'rgba(255,255,255,0.85)',
+    };
+    const CONFIG = {
+      particlesDesktop: 110,
+      particlesMobile: 52,
+      baseLinkDistance: 120,
+      impulsePeriod: 2200,
+      impulseDuration: 900,
+      hexStep: { w: 28, h: 24 },
+      corePosition: { x: 0.5, y: 0.5 },
+      focusPosition: { x: 0.58, y: 0.46 },
+      dprCap: 1.75,
+    };
+    const LINK_CFG = {
+      ON_MULT: 0.88,
+      OFF_MULT: 1.18,
+      CONNECT_RATE: 1.8,
+      DECAY_RATE: 0.9,
+      SOFT_DECAY: 0.4,
+      MIN_STRENGTH: 0.20,
+      GAMMA: 1.15,
+      PULSE_AMPL: 0.25,
+      PULSE_SPEED: 0.6
+    };
+    const CHAOS_CFG = {
+      ENABLED: true,
+      BURST_PERIOD: 18.0,
+      PERIOD_JITTER: 0.6,
+      DURATION_MIN: 1.2,
+      DURATION_MAX: 2.2,
+      RADIUS_MIN: 140,
+      RADIUS_MAX: 240,
+      REPULSE: 55,
+      SUPPRESS_TIME: 0.8,
+      DEGREE_BIAS: 0.5
+    };
+    const DETACH_CFG = {
+      ENABLED: true,
+      PERIOD_BASE: 1.6,
+      PERIOD_JITTER: 0.6,
+      GROUP_MIN: 2,
+      GROUP_MAX: 6,
+      LINK_THRESHOLD: 0.55,
+      OUTWARD_FORCE: 80,
+      DOCK_FORCE: 60,
+      SUPPRESS_TIME: 0.9,
+      DOCK_DURATION: 1.6,
+      TARGET_RADIUS: 160
+    };
+    const DETACH_TUNING = {
+      SEP_SPEED: 0.92,
+      SEP_NOISE: 0.85,
+      DOCK_SPEED: 0.80,
+      DOCK_NOISE: 0.70
+    };
+    const easeInOutCubic = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+    const mix = (a, b, t) => a + (b - a) * t;
+    const SPEED_SCALE = 1/3;
+    const phaseProgress = (s, start, end) => {
+      const range = end - start;
+      if (range <= 0) return s >= end ? 1 : 0;
+      const t = clamp((s - start) / range, 0, 1);
+      return easeInOutCubic(t);
+    };
+    class Particle {
+      constructor(index, width, height, rnd) {
+        this.index = index;
+        this.random = rnd;
+        this.origin = { x: rnd() * width, y: rnd() * height };
+        this.position = { ...this.origin };
+        this.velocity = { x: 0, y: 0 };
+        this.noiseSeed = rnd() * Math.PI * 2;
+        this.hexSlot = { x: 0, y: 0 };
+        this.size = rnd() * 1.5 + 1.1;
+      }
+    }
+    class Scene1 {
+      constructor(canvas, root) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
+        this.root = root;
+        this.random = this.createDeterministicRandom(42);
+        this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        this.particleCount = window.innerWidth <= 768 ? CONFIG.particlesMobile : CONFIG.particlesDesktop;
+        this.particles = new Array(this.particleCount).fill(null).map((_, i) => new Particle(i, window.innerWidth, window.innerHeight, this.random));
+        this.updateHexSlots();
+        this.impulses = [];
+        this.lastImpulseTime = 0;
+        this.scrollProgress = 0;
+        this.smoothedProgress = 0;
+        this.lastTime = performance.now();
+        this.time = 0;
+        this.isDestroyed = false;
+        this.edgeState = new Map();
+        this.chaosForces = new Float32Array(this.particleCount * 2);
+        this.chaosUntil = new Float32Array(this.particleCount);
+        this._chaosBursts = [];
+        this._nextChaosTime = 0;
+        this.detForces = new Float32Array(this.particleCount * 2);
+        this.detDirX = new Float32Array(this.particleCount);
+        this.detDirY = new Float32Array(this.particleCount);
+        this.dockTX = new Float32Array(this.particleCount);
+        this.dockTY = new Float32Array(this.particleCount);
+        this.detEnd = new Float32Array(this.particleCount);
+        this.dockEnd = new Float32Array(this.particleCount);
+        this._nextDetachTime = 0;
+        this.boundResize = () => this.handleResize();
+        this.boundScroll = () => this.updateScroll();
+        this.boundMotionChange = () => {
+          if (this.reducedMotion.matches) {
+            this.impulses = [];
+          }
+        };
+        this.handleResize();
+        window.addEventListener("resize", this.boundResize, { passive: true });
+        window.addEventListener("scroll", this.boundScroll, { passive: true });
+        this.reducedMotion.addEventListener("change", this.boundMotionChange);
+        this.updateScroll();
+        this.smoothedProgress = this.scrollProgress;
+        this.frameId = window.requestAnimationFrame((t) => this.frame(t));
+      }
+      destroy() {
+        if (this.isDestroyed) return;
+        this.isDestroyed = true;
+        window.removeEventListener("resize", this.boundResize);
+        window.removeEventListener("scroll", this.boundScroll);
+        this.reducedMotion.removeEventListener("change", this.boundMotionChange);
+        if (this.frameId) {
+          window.cancelAnimationFrame(this.frameId);
+        }
+      }
+      createDeterministicRandom(seed) {
+        let value = seed % 2147483647;
+        if (value <= 0) value += 2147483646;
+        return () => {
+          value = (value * 16807) % 2147483647;
+          return (value - 1) / 2147483646;
+        };
+      }
+      updateHexSlots() {
+        const width = window.innerWidth, height = window.innerHeight;
+        const cols = Math.ceil(width / CONFIG.hexStep.w);
+        const rows = Math.ceil(height / CONFIG.hexStep.h);
+        const slots = [];
+        for (let row = 0; row < rows; row++) {
+          const offsetX = (row % 2) * (CONFIG.hexStep.w / 2);
+          for (let col = 0; col < cols; col++) {
+            slots.push({ x: col * CONFIG.hexStep.w + offsetX, y: row * CONFIG.hexStep.h });
+          }
+        }
+        this.hexSlots = slots;
+        this.particles.forEach((p, index) => {
+          const slot = this.hexSlots[index % this.hexSlots.length];
+          p.hexSlot = {
+            x: slot.x + CONFIG.hexStep.w * 0.3 * (this.random() - 0.5),
+            y: slot.y + CONFIG.hexStep.h * 0.3 * (this.random() - 0.5)
+          };
+        });
+      }
+      handleResize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, CONFIG.dprCap);
+        this.dpr = dpr;
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width * dpr;
+        this.canvas.height = this.height * dpr;
+        this.canvas.style.width = `${this.width}px`;
+        this.canvas.style.height = `${this.height}px`;
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const desired = this.width <= 768 ? CONFIG.particlesMobile : CONFIG.particlesDesktop;
+        if (this.particles.length !== desired) {
+          this.particleCount = desired;
+          this.particles = new Array(this.particleCount).fill(null).map((_, i) => new Particle(i, this.width, this.height, this.random));
+          this.updateHexSlots();
+          this.edgeState.clear();
+          this.chaosForces = new Float32Array(this.particleCount * 2);
+          this.chaosUntil = new Float32Array(this.particleCount);
+          this._chaosBursts = [];
+          this._nextChaosTime = 0;
+          this.detForces = new Float32Array(this.particleCount * 2);
+          this.detDirX = new Float32Array(this.particleCount);
+          this.detDirY = new Float32Array(this.particleCount);
+          this.dockTX = new Float32Array(this.particleCount);
+          this.dockTY = new Float32Array(this.particleCount);
+          this.detEnd = new Float32Array(this.particleCount);
+          this.dockEnd = new Float32Array(this.particleCount);
+          this._nextDetachTime = 0;
+        } else {
+          this.particles.forEach((p) => {
+            p.origin.x = clamp(p.origin.x, 0, this.width);
+            p.origin.y = clamp(p.origin.y, 0, this.height);
+          });
+        }
+        this.updateHexSlots();
+        this.updateScroll();
+      }
+      updateScroll() {
+        const rect = this.root.getBoundingClientRect();
+        const viewport = window.innerHeight || document.documentElement.clientHeight || 1;
+        const scrollY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const start = rect.top + scrollY;
+        const end = start + rect.height - viewport;
+        if (rect.height <= viewport) {
+          const numerator = viewport - rect.top;
+          const denominator = viewport + Math.max(rect.height, 1);
+          this.scrollProgress = clamp(numerator / denominator, 0, 1);
+          return;
+        }
+        const range = Math.max(end - start, viewport * 0.5);
+        const raw = (scrollY - start) / range;
+        this.scrollProgress = clamp(raw, 0, 1);
+      }
+      getParameters(progress) {
+        const p1 = phaseProgress(progress, 0, 0.22);
+        const p2 = phaseProgress(progress, 0.18, 0.42);
+        const p3 = phaseProgress(progress, 0.38, 0.62);
+        const p4 = phaseProgress(progress, 0.58, 0.82);
+        const p5 = phaseProgress(progress, 0.78, 1);
+        const randomWeight = clamp(1 - 0.75 * p2 - 0.6 * p5, 0.1, 1);
+        const hexWeight = clamp(0.05 + 0.95 * p2 * (1 - 0.3 * p5), 0, 1);
+        const focusWeight = clamp(0.02 + 0.98 * p5, 0, 1);
+        const weightSum = randomWeight + hexWeight + focusWeight;
+        const lineOpacity = clamp(0.15 + 0.15 * p1 + 0.12 * p2 + 0.15 * p3 + 0.2 * p5, 0.15, 0.55);
+        const linkDistanceBase = CONFIG.baseLinkDistance + 30 * p3 + 20 * p4 + 40 * p5;
+        const pulse = this.reducedMotion.matches ? 0 : (0.5 + 0.5 * Math.sin(this.time * LINK_CFG.PULSE_SPEED));
+        const linkDistance = linkDistanceBase * (1 - LINK_CFG.PULSE_AMPL + 2 * LINK_CFG.PULSE_AMPL * pulse);
+        return {
+          p1, p2, p3, p4, p5,
+          weights: {
+            random: randomWeight / weightSum,
+            hex: hexWeight / weightSum,
+            focus: focusWeight / weightSum
+          },
+          lineOpacity,
+          linkDistance,
+          pulse
+        };
+      }
+      maintainChaos(delta, params) {
+        if (!CHAOS_CFG.ENABLED) {
+          this.chaosForces.fill(0);
+          return;
+        }
+        if (this.time >= this._nextChaosTime) {
+          let cx = 0, cy = 0;
+          if (Math.random() < CHAOS_CFG.DEGREE_BIAS && this.edgeState.size > 0) {
+            const deg = new Uint16Array(this.particleCount);
+            for (const [key, st] of this.edgeState) {
+              if (st.w <= LINK_CFG.MIN_STRENGTH) continue;
+              const [si, sj] = key.split('|');
+              const i = Number(si), j = Number(sj);
+              deg[i]++;
+              deg[j]++;
+            }
+            let best = 0, idx = 0;
+            for (let i = 0; i < deg.length; i++) {
+              if (deg[i] > best) {
+                best = deg[i];
+                idx = i;
+              }
+            }
+            cx = this.particles[idx].position.x;
+            cy = this.particles[idx].position.y;
+          } else {
+            const rp = this.particles[Math.floor(Math.random() * this.particles.length)];
+            cx = rp.position.x;
+            cy = rp.position.y;
+          }
+          const r = mix(CHAOS_CFG.RADIUS_MIN, CHAOS_CFG.RADIUS_MAX, Math.random());
+          const dur = mix(CHAOS_CFG.DURATION_MIN, CHAOS_CFG.DURATION_MAX, Math.random());
+          this._chaosBursts.push({ cx, cy, r, start: this.time, end: this.time + dur });
+          for (const p of this.particles) {
+            const dx = p.position.x - cx, dy = p.position.y - cy;
+            if (dx*dx + dy*dy <= r*r) this.chaosUntil[p.index] = Math.max(this.chaosUntil[p.index], this.time + CHAOS_CFG.SUPPRESS_TIME);
+          }
+          const jitter = 1 - CHAOS_CFG.PERIOD_JITTER + 2 * CHAOS_CFG.PERIOD_JITTER * Math.random();
+          this._nextChaosTime = this.time + Math.max(1.2, CHAOS_CFG.BURST_PERIOD * jitter);
+        }
+        this.chaosForces.fill(0);
+        const now = this.time;
+        this._chaosBursts = this._chaosBursts.filter(b => b.end > now);
+        for (const b of this._chaosBursts) {
+          const life = clamp((now - b.start) / (b.end - b.start), 0, 1);
+          const fade = 1 - easeInOutCubic(life);
+          const r2 = b.r * b.r;
+          for (const p of this.particles) {
+            const dx = p.position.x - b.cx;
+            const dy = p.position.y - b.cy;
+            const d2 = dx*dx + dy*dy + 1e-4;
+            if (d2 > r2 * 1.3225) continue;
+            const inv = Math.max(0, 1 - d2 / (r2 * 1.3225));
+            const k = CHAOS_CFG.REPULSE * inv * fade;
+            const idx = p.index * 2;
+            const invLen = 1 / Math.sqrt(d2);
+            this.chaosForces[idx] += dx * invLen * k;
+            this.chaosForces[idx+1] += dy * invLen * k;
+            this.chaosUntil[p.index] = Math.max(this.chaosUntil[p.index], now + 0.2);
+          }
+        }
+      }
+      maintainDetach(delta, params) {
+        const now = this.time;
+        if (now >= this._nextDetachTime && DETACH_CFG.ENABLED) {
+          const adj = new Array(this.particleCount);
+          for (let i = 0; i < adj.length; i++) adj[i] = [];
+          for (const [key, st] of this.edgeState) {
+            if (st.w <= DETACH_CFG.LINK_THRESHOLD) continue;
+            const [si, sj] = key.split('|');
+            const i = Number(si), j = Number(sj);
+            adj[i].push(j);
+            adj[j].push(i);
+          }
+          let seed = -1;
+          let tries = 0;
+          while (tries++ < 20 && seed < 0) {
+            const k = Math.floor(Math.random() * this.particleCount);
+            if (adj[k].length > 0) seed = k;
+          }
+          if (seed >= 0) {
+            const want = Math.floor(DETACH_CFG.GROUP_MIN + Math.random() * (DETACH_CFG.GROUP_MAX - DETACH_CFG.GROUP_MIN + 1));
+            const picked = [];
+            const seen = new Uint8Array(this.particleCount);
+            const q = [seed];
+            seen[seed] = 1;
+            while (q.length && picked.length < want) {
+              const v = q.shift();
+              picked.push(v);
+              for (const n of adj[v]) if (!seen[n]) {
+                seen[n] = 1;
+                q.push(n);
+              }
+            }
+            if (picked.length >= DETACH_CFG.GROUP_MIN) {
+              let cx = 0, cy = 0;
+              for (const i of picked) {
+                cx += this.particles[i].position.x;
+                cy += this.particles[i].position.y;
+              }
+              cx /= picked.length;
+              cy /= picked.length;
+              for (const i of picked) {
+                const p = this.particles[i];
+                const dx = p.position.x - cx, dy = p.position.y - cy;
+                const len = Math.hypot(dx, dy) || 1;
+                const ux = dx / len, uy = dy / len;
+                this.detDirX[i] = ux;
+                this.detDirY[i] = uy;
+                this.detEnd[i] = now + DETACH_CFG.SUPPRESS_TIME;
+                this.dockEnd[i] = this.detEnd[i] + DETACH_CFG.DOCK_DURATION;
+                let j = i;
+                let guard = 0;
+                while ((picked.includes(j) || j === i) && guard++ < 50) j = Math.floor(Math.random() * this.particleCount);
+                const tgt = this.particles[j];
+                const ang = Math.random() * Math.PI * 2;
+                const rad = Math.random() * DETACH_CFG.TARGET_RADIUS;
+                this.dockTX[i] = tgt.position.x + Math.cos(ang) * rad;
+                this.dockTY[i] = tgt.position.y + Math.sin(ang) * rad;
+                this.chaosUntil[i] = Math.max(this.chaosUntil[i], this.detEnd[i]);
+              }
+            }
+          }
+          const jitter = 1 - DETACH_CFG.PERIOD_JITTER + 2 * DETACH_CFG.PERIOD_JITTER * Math.random();
+          this._nextDetachTime = now + Math.max(0.6, DETACH_CFG.PERIOD_BASE * jitter);
+        }
+        this.detForces.fill(0);
+        for (let i = 0; i < this.particleCount; i++) {
+          const tDetach = this.detEnd[i];
+          const tDock = this.dockEnd[i];
+          if (tDock <= 0) continue;
+          if (now < tDetach) {
+            const fade = 1 - clamp((tDetach - now) / DETACH_CFG.SUPPRESS_TIME, 0, 1);
+            const k = DETACH_CFG.OUTWARD_FORCE * fade;
+            const idx = i * 2;
+            this.detForces[idx] += this.detDirX[i] * k;
+            this.detForces[idx+1] += this.detDirY[i] * k;
+          } else if (now < tDock) {
+            const p = this.particles[i];
+            const tx = this.dockTX[i], ty = this.dockTY[i];
+            const dx = tx - p.position.x, dy = ty - p.position.y;
+            const fade = 1 - clamp((now - tDetach) / (tDock - tDetach), 0, 1);
+            const len2 = dx*dx + dy*dy + 1e-4;
+            const invLen = 1 / Math.sqrt(len2);
+            const k = DETACH_CFG.DOCK_FORCE * fade;
+            const idx = i * 2;
+            this.detForces[idx] += dx * invLen * k;
+            this.detForces[idx+1] += dy * invLen * k;
+          } else {
+            this.detEnd[i] = 0;
+            this.dockEnd[i] = 0;
+            this.detDirX[i] = 0;
+            this.detDirY[i] = 0;
+            this.dockTX[i] = 0;
+            this.dockTY[i] = 0;
+          }
+        }
+      }
+      updateParticles(delta, params) {
+        const { weights, p4, p5 } = params;
+        const focusPoint = {
+          x: CONFIG.focusPosition.x * this.width,
+          y: CONFIG.focusPosition.y * this.height
+        };
+        const corePoint = {
+          x: CONFIG.corePosition.x * this.width,
+          y: CONFIG.corePosition.y * this.height
+        };
+        const baseSpeed = this.reducedMotion.matches ? 0.08 : 0.16;
+        const focusPull = p5 * 0.2;
+        const coreInfluence = p4 * 0.75;
+        for (const p of this.particles) {
+          const toRandom = { x: p.origin.x - p.position.x, y: p.origin.y - p.position.y };
+          const toHex = { x: p.hexSlot.x - p.position.x, y: p.hexSlot.y - p.position.y };
+          const toFocus = { x: focusPoint.x - p.position.x, y: focusPoint.y - p.position.y };
+          const toCore = { x: corePoint.x - p.position.x, y: corePoint.y - p.position.y };
+          const pulsePull = 0.12 * (0.5 + 0.5 * Math.sin(this.time * LINK_CFG.PULSE_SPEED));
+          const alignment = weights.random + weights.hex + weights.focus + pulsePull;
+          const vx = toRandom.x * weights.random + toHex.x * (weights.hex + pulsePull) + toFocus.x * weights.focus * (0.4 + focusPull) + toCore.x * coreInfluence * 0.2;
+          const vy = toRandom.y * weights.random + toHex.y * (weights.hex + pulsePull) + toFocus.y * weights.focus * (0.4 + focusPull) + toCore.y * coreInfluence * 0.2;
+          p.velocity.x = mix(p.velocity.x, vx, 0.05 * alignment);
+          p.velocity.y = mix(p.velocity.y, vy, 0.05 * alignment);
+          const noise = this.computeFlowField(p, params);
+          const idx = p.index * 2;
+          const fx = (this.chaosForces[idx] || 0) + (this.detForces[idx] || 0);
+          const fy = (this.chaosForces[idx+1] || 0) + (this.detForces[idx+1] || 0);
+          const now = this.time;
+          const tDetach = this.detEnd[p.index];
+          const tDock = this.dockEnd[p.index];
+          let speedScale = 1.0, noiseScale = 1.0;
+          if (tDock > 0) {
+            if (now < tDetach) {
+              speedScale *= DETACH_TUNING.SEP_SPEED;
+              noiseScale *= DETACH_TUNING.SEP_NOISE;
+            } else if (now < tDock) {
+              speedScale *= DETACH_TUNING.DOCK_SPEED;
+              noiseScale *= DETACH_TUNING.DOCK_NOISE;
+            }
+          }
+          p.position.x += ((p.velocity.x * baseSpeed * speedScale + noise.x * noiseScale) * delta + fx * delta) * SPEED_SCALE;
+          p.position.y += ((p.velocity.y * baseSpeed * speedScale + noise.y * noiseScale) * delta + fy * delta) * SPEED_SCALE;
+        }
+      }
+      computeFlowField(p, params) {
+        const t = (performance.now() * 0.00025 + p.noiseSeed) % Math.PI;
+        const driftStrength = 0.12 + 0.06 * (1 - params.p2) + 0.04 * params.p3;
+        const curlX = Math.sin(t + p.index * 0.015) * driftStrength;
+        const curlY = Math.cos(t * 1.3 + p.index * 0.02) * driftStrength;
+        const focusPull = params.p5 * 0.32;
+        const corePull = params.p4 * 0.22;
+        return {
+          x: curlX + (focusPull + corePull) * 0.12,
+          y: curlY + (focusPull + corePull) * 0.12
+        };
+      }
+      updateEdges(delta, params) {
+        const linkD = params.linkDistance;
+        const onD = LINK_CFG.ON_MULT * linkD;
+        const offD = LINK_CFG.OFF_MULT * linkD;
+        const onD2 = onD * onD, offD2 = offD * offD;
+        const now = this.time;
+        for (let i = 0; i < this.particles.length; i++) {
+          const a = this.particles[i];
+          for (let j = i + 1; j < this.particles.length; j++) {
+            const b = this.particles[j];
+            const dx = a.position.x - b.position.x;
+            const dy = a.position.y - b.position.y;
+            const d2 = dx * dx + dy * dy;
+            const key = i < j ? (i + '|' + j) : (j + '|' + i);
+            const hasState = this.edgeState.has(key);
+            if (!hasState && d2 > offD2) continue;
+            const st = this.edgeState.get(key) || { w: 0, last: now };
+            if (this.chaosUntil[i] > now || this.chaosUntil[j] > now) {
+              st.w = Math.max(0, st.w - (LINK_CFG.DECAY_RATE * 1.4 + 0.4) * delta);
+              st.last = now;
+              if (st.w > 0) this.edgeState.set(key, st);
+              else this.edgeState.delete(key);
+              continue;
+            }
+            const vx = a.velocity.x - b.velocity.x;
+            const vy = a.velocity.y - b.velocity.y;
+            const approaching = (dx * vx + dy * vy) < 0;
+            if (d2 < onD2 && approaching) {
+              st.w = Math.min(1, st.w + LINK_CFG.CONNECT_RATE * delta);
+            } else if (d2 > offD2) {
+              st.w = Math.max(0, st.w - LINK_CFG.DECAY_RATE * delta);
+            } else {
+              st.w = Math.max(0, st.w - LINK_CFG.SOFT_DECAY * LINK_CFG.DECAY_RATE * delta);
+            }
+            st.last = now;
+            if (st.w > 0) this.edgeState.set(key, st);
+            else this.edgeState.delete(key);
+          }
+        }
+      }
+      maintainImpulses(params) {
+        if (this.reducedMotion.matches) return;
+        const now = performance.now();
+        const shouldSpawn = now - this.lastImpulseTime > CONFIG.impulsePeriod * (0.7 + Math.random() * 0.6);
+        if (shouldSpawn && params.p3 > 0.25) {
+          this.lastImpulseTime = now;
+          const rnd = this.particles[Math.floor(Math.random() * this.particles.length)];
+          if (rnd) {
+            this.impulses.push({ startTime: now, duration: CONFIG.impulseDuration, target: { ...rnd.position }, radius: 2 + Math.random() });
+          }
+        }
+        this.impulses = this.impulses.filter((imp) => now - imp.startTime < imp.duration);
+      }
+      draw(params) {
+        const { ctx } = this;
+        ctx.save();
+        ctx.clearRect(0, 0, this.width, this.height);
+        ctx.globalCompositeOperation = "lighter";
+        ctx.globalAlpha = 0.08 + 0.12 * params.p3 + 0.1 * params.p5;
+        ctx.fillStyle = COLORS.background;
+        ctx.fillRect(0, 0, this.width, this.height);
+        this.drawEdges(params);
+        this.drawParticles(params);
+        this.drawCore(params);
+        this.drawFocus(params);
+        ctx.restore();
+      }
+      drawEdges(params) {
+        const { ctx } = this;
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        ctx.strokeStyle = COLORS.line;
+        ctx.lineWidth = 1;
+        const linkD2 = params.linkDistance * params.linkDistance;
+        for (const [key, st] of this.edgeState) {
+          if (st.w <= LINK_CFG.MIN_STRENGTH) continue;
+          const [si, sj] = key.split('|');
+          const i = Number(si), j = Number(sj);
+          const a = this.particles[i], b = this.particles[j];
+          const dx = a.position.x - b.position.x;
+          const dy = a.position.y - b.position.y;
+          const d2 = dx * dx + dy * dy;
+          const strengthDist = clamp(1 - d2 / linkD2, 0, 1);
+          const alpha = params.lineOpacity * Math.pow(st.w, LINK_CFG.GAMMA) * strengthDist;
+          if (alpha <= 0.001) continue;
+          ctx.globalAlpha = alpha;
+          ctx.beginPath();
+          ctx.moveTo(a.position.x, a.position.y);
+          ctx.lineTo(b.position.x, b.position.y);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+      drawParticles(params) {
+        const { ctx } = this;
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        for (const p of this.particles) {
+          ctx.beginPath();
+          ctx.fillStyle = COLORS.particle;
+          ctx.globalAlpha = clamp(0.45 + params.p3 * 0.15 + params.p5 * 0.1, 0.4, 0.8);
+          ctx.arc(p.position.x, p.position.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+      drawCore(params) {
+        if (params.p4 <= 0) return;
+        const { ctx } = this;
+        const center = {
+          x: CONFIG.corePosition.x * this.width,
+          y: CONFIG.corePosition.y * this.height
+        };
+        const radius = mix(24, 48, params.p4);
+        const gradient = ctx.createRadialGradient(center.x, center.y, radius * 0.2, center.x, center.y, radius);
+        gradient.addColorStop(0, `rgba(200, 255, 200, ${clamp(0.1 + params.p4 * 0.45, 0.1, 0.55)})`);
+        gradient.addColorStop(1, 'rgba(200, 255, 200, 0)');
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        ctx.fillStyle = gradient;
+        ctx.fillRect(center.x - radius, center.y - radius, radius * 2, radius * 2);
+        ctx.restore();
+      }
+      drawFocus(params) {
+        if (params.p5 <= 0) return;
+        const { ctx } = this;
+        const focus = {
+          x: CONFIG.focusPosition.x * this.width,
+          y: CONFIG.focusPosition.y * this.height
+        };
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        const convergence = clamp(params.p5, 0.1, 1);
+        const lineOpacity = 0.3 + 0.25 * convergence;
+        ctx.strokeStyle = COLORS.line;
+        ctx.lineWidth = 1.2;
+        ctx.globalAlpha = lineOpacity;
+        for (const p of this.particles) {
+          const dx = focus.x - p.position.x;
+          const dy = focus.y - p.position.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 > params.linkDistance * params.linkDistance * 0.9) continue;
+          const strength = 1 - d2 / (params.linkDistance * params.linkDistance);
+          ctx.beginPath();
+          ctx.moveTo(p.position.x, p.position.y);
+          ctx.lineTo(focus.x, focus.y);
+          ctx.globalAlpha = lineOpacity * strength * convergence;
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = COLORS.accent;
+        ctx.lineWidth = 2.5;
+        const growthVector = [
+          { x: focus.x, y: focus.y + mix(16, 24, convergence) },
+          { x: focus.x + mix(12, 18, convergence), y: focus.y - mix(22, 32, convergence) },
+          { x: focus.x + mix(24, 34, convergence), y: focus.y - mix(52, 68, convergence) }
+        ];
+        ctx.beginPath();
+        ctx.moveTo(growthVector[0].x, growthVector[0].y);
+        ctx.lineTo(growthVector[1].x, growthVector[1].y);
+        ctx.lineTo(growthVector[2].x, growthVector[2].y);
+        ctx.stroke();
+        ctx.fillStyle = COLORS.accent;
+        ctx.beginPath();
+        ctx.arc(growthVector[2].x, growthVector[2].y, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      frame(timestamp) {
+        if (this.isDestroyed) return;
+        const delta = clamp((timestamp - this.lastTime) * 0.001, 0.016, 0.08);
+        this.lastTime = timestamp;
+        this.time += delta;
+        const smoothingSpeed = this.reducedMotion.matches ? 6 : 10;
+        const lerp = clamp(delta * smoothingSpeed, 0, 1);
+        this.smoothedProgress = mix(this.smoothedProgress, this.scrollProgress, lerp);
+        const params = this.getParameters(this.smoothedProgress);
+        this.maintainChaos(delta, params);
+        this.maintainDetach(delta, params);
+        this.updateParticles(delta, params);
+        this.updateEdges(delta, params);
+        this.maintainImpulses(params);
+        this.draw(params);
+        this.frameId = window.requestAnimationFrame((t) => this.frame(t));
+      }
+    }
+    function initPhase1() {
+      const root = document.getElementById('scene1');
+      const canvas = root.querySelector('.scene1__canvas');
+      if (!canvas) return null;
+      return new Scene1(canvas, root.querySelector('.scene1__content'));
+    }
+    window.initPhase1 = initPhase1;
+  })(window, document);
+  // ===== Фаза 1.5: пять трёхмерных колец =====
+  (function(){
+    "use strict";
+    const CFG = {
+      dprCap: 1.75,
+      // количество точек подгоняем под первую фазу: 110 на десктопе, 52 на мобильных, как в Impro Digital
+      dots: (window.innerWidth <= 768 ? 52 : 110),
+      ringCount: 5,
+      ringRadiusDesktop: [110,110,110,110,110],
+      ringRadiusMobile: [80,80,80,80,80],
+      ringThickness: 14,
+      // настройки вращения и разброса для колец, как в референсе: быстрое вращение
+      // и небольшой радиальный шум. Эти значения взяты из оригинального кода фазы 1.5
+      swirlSpeed: 0.18,
+      jitter: 0.015,
+      linkDistance: 120,
+      linkOn: 0.85,
+      linkOff: 1.18,
+      linkOpacityMax: 0.55,
+      mouse: { radius: 140, force: 260, smooth: 12 },
+      depth: { min: 0.65, max: 1.35 },
+      labels: ["Перфоманс","Контент","Веб и MarTech","Брендинг","Стратегия"],
+      urls: [
+        "#service-performance",
+        "#service-content",
+        "#service-web-martech",
+        "#service-branding",
+        "#service-strategy"
+      ],
+      centersDesktop: [ {x:0.22,y:0.42}, {x:0.40,y:0.58}, {x:0.60,y:0.36}, {x:0.78,y:0.52}, {x:0.50,y:0.72} ],
+      centersMobile: [ {x:0.30,y:0.35}, {x:0.70,y:0.35}, {x:0.30,y:0.68}, {x:0.70,y:0.68}, {x:0.50,y:0.52} ]
+    };
+
+    // expose CFG on the global window so it can be accessed by the unified renderer script
+    window.CFG = CFG;
+    const clamp = (v,a,b)=>Math.min(Math.max(v,a),b);
+    const mix = (a,b,t)=>a+(b-a)*t;
+    const ease = t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+    function makeRng(seed){ let v=seed%2147483647; if(v<=0) v+=2147483646; return ()=>{ v=(v*16807)%2147483647; return (v-1)/2147483646; }; }
+    class Particle{
+      constructor(i,w,h,rng){
+        this.i=i; this.rng=rng;
+        this.pos={x:rng()*w,y:rng()*h};
+        this.vel={x:0,y:0};
+        this.z = mix(CFG.depth.min, CFG.depth.max, rng());
+        this.noise=rng()*Math.PI*2;
+        this.size = 1.1 + this.rng()*1.5;
+        this.ring = i % CFG.ringCount;
+        this.ord  = Math.floor(i/CFG.ringCount);
+      }
+    }
+    class Scene2{
+      constructor(root){
+        this.root=root;
+        this.canvas=root.querySelector('canvas');
+        this.ctx=this.canvas.getContext('2d');
+        this.linkLayer=root.querySelector('[data-link-layer]');
+        
+        // Detach link layer from Scene2 so parent opacity doesn't hide ring buttons in unified mode
+        if (this.linkLayer && this.linkLayer.parentElement) {
+          document.body.appendChild(this.linkLayer);
+        }
+this.rng=makeRng(42);
+        this.time=0; this.last=performance.now();
+        this.mouse={x:-1e9,y:-1e9,sx:-1e9,sy:-1e9,inside:false};
+        this.edges=new Map();
+        this.particles=[];
+        this.links=[];
+        this.build();
+        this.onResize();
+        addEventListener('resize',()=>this.onResize(),{passive:true});
+        addEventListener('pointermove',e=>this.onPointer(e),{passive:true});
+        addEventListener('pointerdown',e=>this.onPointer(e),{passive:true});
+        addEventListener('pointerleave',()=>{this.mouse.inside=false},{passive:true});
+        requestAnimationFrame(t=>this.frame(t));
+      }
+
+      /**
+       * Инициализирует частицы позициями из другой системы.
+       * Принимает массив объектов с полями { x, y }. Если количество
+       * переданных точек меньше нашего, позиции циклично повторяются.
+       * Этот метод следует вызывать один раз перед тем, как сцена
+       * становится видимой, чтобы обеспечить плавный переход между
+       * фазами: точки во второй фазе начнут своё движение из положения
+       * первой.
+       * @param {Array<{x:number,y:number}>} positions
+       */
+      initFromPositions(positions){
+        if(!positions || !positions.length) return;
+        for(let i=0;i<this.particles.length;i++){
+          const src = positions[i % positions.length];
+          this.particles[i].pos.x = src.x;
+          this.particles[i].pos.y = src.y;
+          this.particles[i].vel.x = 0;
+          this.particles[i].vel.y = 0;
+          // assign depth randomly so parallax still looks organic
+          this.particles[i].z = mix(CFG.depth.min, CFG.depth.max, Math.random());
+          // reset ring index and ordinal: will be recomputed when rings defined
+          this.particles[i].ring = i % CFG.ringCount;
+          this.particles[i].ord  = Math.floor(i/CFG.ringCount);
+        }
+        // clear existing edges so links build up gradually again
+        this.edges = new Map();
+      }
+      build(){
+        const count=CFG.dots; this.particles.length=0;
+        for(let i=0;i<count;i++) this.particles.push(new Particle(i, innerWidth, innerHeight, this.rng));
+        this.linkLayer.innerHTML=''; this.links.length=0;
+        for(let i=0;i<CFG.ringCount;i++){
+          const a=document.createElement('a');
+          a.href=CFG.urls[i]||'#'; a.textContent=CFG.labels[i]||`Сервис ${i+1}`;
+          a.setAttribute('aria-label',a.textContent);
+          this.linkLayer.appendChild(a); this.links.push(a);
+        }
+      }
+      onResize(){
+        const dpr=Math.min(devicePixelRatio||1, CFG.dprCap);
+        this.dpr=dpr;
+        this.w=innerWidth; this.h=innerHeight;
+        this.canvas.width=this.w*dpr; this.canvas.height=this.h*dpr;
+        this.canvas.style.width=this.w+'px'; this.canvas.style.height=this.h+'px';
+        this.ctx.setTransform(dpr,0,0,dpr,0,0);
+        this.isMobile = this.w<=768;
+        const centers = (this.isMobile?CFG.centersMobile:CFG.centersDesktop).map(c=>({x:c.x*this.w,y:c.y*this.h}));
+        const radii = (this.isMobile?CFG.ringRadiusMobile:CFG.ringRadiusDesktop);
+        this.rings = centers.map((c,idx)=>({cx:c.x,cy:c.y,R:radii[idx]||radii[0]}));
+      }
+      onPointer(e){
+        const r=this.canvas.getBoundingClientRect();
+        this.mouse.x=e.clientX-r.left; this.mouse.y=e.clientY-r.top;
+        this.mouse.inside = e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom;
+      }
+      frame(t){
+        const dt=clamp((t-this.last)*0.001,0.016,0.05); this.last=t; this.time+=dt;
+        if(!Number.isFinite(this.mouse.sx) || this.mouse.sx<-1e8){ this.mouse.sx=this.mouse.x; this.mouse.sy=this.mouse.y; }
+        const k=clamp(dt*(CFG.mouse.smooth||12),0,1);
+        this.mouse.sx=mix(this.mouse.sx,this.mouse.x,k);
+        this.mouse.sy=mix(this.mouse.sy,this.mouse.y,k);
+        this.update(dt);
+        this.draw();
+        requestAnimationFrame(tt=>this.frame(tt));
+      }
+      update(dt){
+        const twoPI=Math.PI*2; const swirl=CFG.swirlSpeed;
+        const mR=CFG.mouse.radius; const mR2=mR*mR; const mx=this.mouse.sx, my=this.mouse.sy; const useMouse=this.mouse.inside;
+        for(const p of this.particles){
+          const ring=this.rings[p.ring];
+          const baseAngle = (p.ord*7 + p.ring*23) * (Math.PI/180);
+          const angle = baseAngle + this.time*swirl*(p.ring%2?1:-1);
+          const radial = ring.R * mix(1-CFG.jitter, 1+CFG.jitter, (p.noise*0.318)%1);
+          const tx = ring.cx + Math.cos(angle)*radial;
+          const ty = ring.cy + Math.sin(angle)*radial*(p.z);
+          const ax=(tx-p.pos.x)*0.55, ay=(ty-p.pos.y)*0.55;
+          const tflow = this.time*0.35 + p.noise + p.i*0.013;
+          const nx=Math.sin(tflow)*0.25, ny=Math.cos(tflow*1.15)*0.25;
+          p.vel.x = mix(p.vel.x, ax+nx, 0.08);
+          p.vel.y = mix(p.vel.y, ay+ny, 0.08);
+          if(useMouse){
+            const dx=p.pos.x-mx, dy=p.pos.y-my, d2=dx*dx+dy*dy;
+            if(d2<mR2){ const d=Math.sqrt(d2)+1e-4; const s=(1-d/mR); const f=CFG.mouse.force*s*s; p.vel.x += (dx/d)*f*dt; p.vel.y += (dy/d)*f*dt; }
+          }
+          p.pos.x += p.vel.x*dt; p.pos.y += p.vel.y*dt;
+        }
+        const onD=CFG.linkOn*CFG.linkDistance, offD=CFG.linkOff*CFG.linkDistance; const on2=onD*onD, off2=offD*offD;
+        const now=this.time;
+        for(let i=0;i<this.particles.length;i++){
+          const a=this.particles[i];
+          for(let j=i+1;j<this.particles.length;j++){
+            const b=this.particles[j];
+            if(a.ring!==b.ring){ if(((a.i%11)!==(b.i%11)) && Math.abs(a.ring-b.ring)>1) continue; }
+            const dx=a.pos.x-b.pos.x, dy=a.pos.y-b.pos.y; const d2=dx*dx+dy*dy;
+            const key=i+'|'+j; let st=this.edges.get(key);
+            if(!st && d2>off2) continue;
+            if(!st) st={w:0,last:now};
+            if(d2<on2){ st.w=Math.min(1, st.w + 1.6*dt); }
+            else if(d2>off2){ st.w=Math.max(0, st.w - 0.9*dt); }
+            else { st.w=Math.max(0, st.w - 0.4*0.9*dt); }
+            st.last=now;
+            if(st.w>0.02) this.edges.set(key,st);
+            else this.edges.delete(key);
+          }
+        }
+        this.updateAnchors();
+      }
+      updateAnchors(){
+        const centers=this.rings; const readyAlpha=this.ringCoherence();
+        for(let i=0;i<this.links.length;i++){
+          const a=this.links[i]; const c=centers[i]; if(!c) continue;
+          const x=c.cx, y=c.cy;
+          a.style.left=x+'px'; a.style.top=y+'px';
+          const t=clamp((readyAlpha-0.55)/0.25,0,1);
+          a.style.opacity = t.toFixed(3);
+          a.style.transform = `translate(-50%,-50%) scale(${mix(0.98,1.0,t).toFixed(3)})`;
+        }
+      }
+      ringCoherence(){
+        let sum=0, cnt=0;
+        for(const p of this.particles){ const r=this.rings[p.ring]; const dx=p.pos.x-r.cx, dy=p.pos.y-r.cy; const d=Math.hypot(dx,dy); const t=r.R; const err=Math.abs(d-t)/t; sum+=clamp(1-err,0,1); cnt++; }
+        return cnt? sum/cnt : 0;
+      }
+      draw(){
+        const ctx=this.ctx; ctx.save();
+        ctx.clearRect(0,0,this.w,this.h);
+        const g=ctx.createRadialGradient(this.w*0.5,this.h*0.5, this.h*0.2, this.w*0.5,this.h*0.5, this.h*0.75);
+        g.addColorStop(0,'rgba(10,12,16,0.0)'); g.addColorStop(1,'rgba(10,12,16,0.65)');
+        ctx.fillStyle=g; ctx.fillRect(0,0,this.w,this.h);
+        ctx.globalCompositeOperation='screen';
+        ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--impro-line').trim() || 'rgba(230,230,230,0.32)';
+        ctx.lineWidth=1;
+        for(const [key,st] of this.edges){ if(st.w<=0.02) continue; const [i,j]=key.split('|').map(Number); const a=this.particles[i], b=this.particles[j]; const dx=a.pos.x-b.pos.x, dy=a.pos.y-b.pos.y; const d2=dx*dx+dy*dy; const strength=clamp(1-d2/(CFG.linkDistance*CFG.linkDistance),0,1); const alpha=CFG.linkOpacityMax*Math.pow(st.w,1.15)*strength; if(alpha<=0.002) continue; ctx.globalAlpha=alpha; ctx.beginPath(); ctx.moveTo(a.pos.x,a.pos.y); ctx.lineTo(b.pos.x,b.pos.y); ctx.stroke(); }
+        for(const p of this.particles){ const a=clamp(0.42 + (p.z-1)*0.22, 0.28, 0.85); ctx.globalAlpha=a; ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--impro-dot').trim() || 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.arc(p.pos.x, p.pos.y, p.size*mix(0.9,1.25,p.z-0.65), 0, Math.PI*2); ctx.fill(); }
+        ctx.restore();
+      }
+    }
+    function initPhase15(){
+      const root=document.getElementById('scene2');
+      if(!root) return null;
+      return new Scene2(root);
+    }
+    window.initPhase15=initPhase15;
+  })();
+  // ===== Инициализация сцен без смены видимости. =====
+  (function(){
+    // запускаем обе фазы и экспортируем их в глобальную область, чтобы
+    // unified‑рендерер мог использовать их внутренние состояния. Сами
+    // холсты фаз скрыты через CSS, но логика обновления работает.
+    const phase1 = window.initPhase1();
+    const phase2 = window.initPhase15();
+    window.phase1 = phase1;
+    window.phase2 = phase2;
+  })();
+
+  // ===== Unified renderer: отображает плавное преобразование частиц при прокрутке =====
+(function(){
+    // Unified renderer: blends between Scene1 (clusters) and Scene2 (rings) as you scroll.
+    // Pull the ring configuration from the global window. CFG is defined in another script
+    // with const, so without this assignment it would be undefined here.
+    const CFG = window.CFG;
+    const canvas = document.getElementById('unified-canvas');
+    // Захватываем холст DNA однажды. Он будет использоваться для плавного
+    // появления 3D‑спирали после окончания фазы колец. Если элемента нет,
+    // скрипт просто пропустит изменение его прозрачности.
+    const dnaCanvas = document.getElementById('dnaCanvas');
+    if(!canvas){ return; }
+    const ctx = canvas.getContext('2d');
+    let dpr = 1;
+    let lastTs = performance.now();
+    let phaseTransitionStarted = false;
+    // Variables for custom ring morphing.  We maintain a swirl time, per-particle noise and depth
+    // arrays for jitter and parallax, and a cached list of ring edges connecting particles in each ring.
+    let swirlTime = 0;
+    let noiseArr = [];
+    let depthArr = [];
+    let ringEdges = [];
+    let lastCount = 0;
+
+    // For the fake ring→DNA transformation we pre‑compute a target position for every particle.
+    // These positions lie along a vertical helix so that, when broken apart, the rings seem to
+    // coalesce into the DNA structure.  We update this array whenever the particle count or
+    // viewport dimensions change.  During the break phase (controlled via breakStart) the
+    // algorithm linearly interpolates between the ring position and the corresponding DNA target.
+    let dnaTargets = [];
+    let dnaEdges = [];
+    // Break start defines when in the scroll (0..1 of the total scrollable height) the rings
+    // begin dissolving into their DNA targets.  A value slightly below 1 gives the user time
+    // to experience the ring phase before the final transition.  See breakProg below for usage.
+    const breakStart = 0.32;  // немного позже, чтобы зритель успел увидеть собранные кольца
+    // Resize unified canvas to viewport; respect dpr cap from phase1 if available.
+    function resize(){
+      const ph1 = window.phase1;
+      // cap DPR using whichever scene exists; fallback to 2.
+      const cap = (ph1 && ph1.dpr) ? ph1.dpr : 2;
+      dpr = Math.min(window.devicePixelRatio || 1, cap);
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Whenever the viewport size changes we rebuild the dnaTargets array using the last
+      // known particle count (lastCount).  Each particle is assigned a point on a simple
+      // 2D helix (spiral) that spans the height of the viewport.  This ensures that
+      // particles travel towards the centre of the screen and vertically up/down during
+      // the break animation, loosely imitating the 3D helix.  If there are no particles
+      // yet (e.g. before phase initialisation) this loop is skipped.
+      if(lastCount > 0){
+        dnaTargets = new Array(lastCount);
+        // Number of turns the fake helix makes from top to bottom.  Adjust to taste.
+        const TAU = Math.PI * 2;
+        const helixTurns = 3.4; // closer to final silhouette
+        const radiusPx = Math.min(w, h) * 0.19;
+        const verticalSpan = h * 0.92;
+        const wobbleY = radiusPx * 0.28;
+
+        for(let i=0; i<lastCount; i++){
+          const frac = i / lastCount; // 0..1
+          const angle = frac * helixTurns * TAU;
+
+          const strandPhase = (i % 2 === 0) ? 0 : Math.PI;
+
+          // subtle waist/bulge to mimic final DNA profile
+          const waist = 0.78 + 0.22 * Math.sin((frac - 0.5) * Math.PI * 2);
+          const r = radiusPx * waist;
+
+          const xOff = Math.cos(angle + strandPhase) * r;
+          const yOff = Math.sin(angle + strandPhase) * wobbleY;
+
+          const vertical = (frac - 0.5) * verticalSpan;
+
+          const x = w / 2 + xOff;
+          const y = h / 2 + vertical + yOff;
+
+          dnaTargets[i] = [x, y];
+        }
+      }
+    }
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+    // Ease function for smoother scroll.
+    function easeInOut(t){ return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+
+    function easeInOutQuint(t){ return t < 0.5 ? 16*t*t*t*t*t : 1 - Math.pow(-2*t+2,5)/2; }
+    function render(now){
+      const ph1 = window.phase1;
+      const ph2 = window.phase2;
+      // wait until both scenes are initialised
+      if(!ph1 || !ph2){ requestAnimationFrame(render); return; }
+      const scrollTop = window.scrollY;
+      // compute progress relative to our `.page` container height
+      const pageEl = document.querySelector('.page');
+      let norm = 0;
+      if(pageEl){
+        const rect = pageEl.getBoundingClientRect();
+        const start = scrollTop + rect.top;
+        const range = Math.max(1, pageEl.offsetHeight - window.innerHeight);
+        norm = Math.max(0, Math.min(1, (scrollTop - start) / range));
+      }
+      // morph progress ends at halfway (0.5) – after that rings are fully assembled
+      const morphNorm = Math.min(1, norm / 0.5);
+      const prog = easeInOut(morphNorm);
+      // После достижения определённой стадии morphing (crossStart) начинаем
+      // плавно переключать прозрачности: unified‑canvas исчезает, dna‑canvas появляется.
+      // Вычисляем прогресс перекрытия для перехода к ДНК. Используем нормализованный
+      // прогресс до морфа (norm), а не easing, чтобы этап DNA запускался в конце
+      // полосы прокрутки более предсказуемо. Старт перехода задан constant `crossStart`.
+      // Порог начала перехода к ДНК. Если crossStart = 1, переключение
+      // произойдёт только в самом конце прокрутки без плавного fade.
+      // crossfade is computed after breakProg (see opacity update block below)
+// Compute progress of the ring→DNA break transition.  When the scroll
+      // position exceeds breakStart, the value linearly grows from 0 to 1 as
+      // norm approaches 1.  This value is used to steer particles from their
+      // ring positions to their DNA target positions, and to fade out ring
+      // connections and anchors.  If breakStart >= 1, breakProg never
+      // increases (no break happens).
+      let breakProg = 0;
+      if (breakStart < 1 && norm > breakStart) {
+        const raw = Math.max(0, Math.min(1, (norm - breakStart) / (1 - breakStart)));
+        const slowed = Math.pow(raw, 1.6); // slower overall transition // keep near-0 longer
+        breakProg = easeInOutQuint(slowed);
+      }
+      // Определяем мягкий crossfade между прокси (2D) и настоящей 3D‑ДНК.
+      // Запускаем плавное перекрытие немного раньше финала, чтобы исчезновение
+      // колец выглядело бесшовным.
+      const crossStart = 0.78;
+      const crossEnd = 0.98;
+      const crossT = Math.max(0, Math.min(1, (breakProg - crossStart) / (crossEnd - crossStart)));
+      const crossEase = easeInOutQuint(crossT);
+
+      if (dnaCanvas) {
+        dnaCanvas.style.opacity = crossEase.toFixed(3);
+        dnaCanvas.style.transform = `translate3d(0, 0, 0) scale(1)`;
+      }
+      if (canvas) {
+        canvas.style.opacity = (1 - crossEase).toFixed(3);
+      }
+
+      // Proxy remains visible until the end of the fade; minimal overlap.
+      // At the start of transition, initialise phase2 from phase1 positions for smooth morph.
+      if(!phaseTransitionStarted && prog > 0.02){
+        const positions = ph1.particles.map(p => ({x: p.position.x, y: p.position.y}));
+        // call initFromPositions defined on Scene2 to seed ring particles
+        if(typeof ph2.initFromPositions === 'function'){
+          ph2.initFromPositions(positions);
+        }
+        phaseTransitionStarted = true;
+      }
+      // compute delta time (unused now but kept for potential future use)
+      const dt = (now - lastTs) * 0.001;
+      lastTs = now;
+      ctx.save();
+      // paint background
+      const bg = getComputedStyle(document.documentElement).getPropertyValue('--impro-bg').trim() || '#0b0e12';
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+      // number of particles to draw (use the smaller of the two scenes)
+      const count = Math.min(ph1.particles.length, ph2.particles.length);
+      // If count changed (first run or resize), initialise per-particle noise/depth and ring edges
+      if(!lastCount || lastCount !== count){
+        noiseArr = new Array(count);
+        depthArr = new Array(count);
+        ringEdges = [];
+        const ringCount = CFG.ringCount;
+        const ringSize = Math.floor(count / ringCount);
+        for(let i=0; i<count; i++){
+          noiseArr[i] = Math.random();
+          // depth for parallax effect between CFG.depth.min and max
+          depthArr[i] = CFG.depth.min + (CFG.depth.max - CFG.depth.min) * Math.random();
+        }
+        // build simple loop edges: each particle connects to its next two neighbours within its ring
+        for(let r=0; r<CFG.ringCount; r++){
+          for(let ord=0; ord<ringSize; ord++){
+            const idx = r + ord * CFG.ringCount;
+            const next1 = r + ((ord + 1) % ringSize) * CFG.ringCount;
+            const next2 = r + ((ord + 2) % ringSize) * CFG.ringCount;
+            const next3 = r + ((ord + 3) % ringSize) * CFG.ringCount;
+            ringEdges.push([idx, next1]);
+            ringEdges.push([idx, next2]);
+            ringEdges.push([idx, next3]);
+          }
+        }
+        lastCount = count;
+
+        // Compute target positions for the ring→DNA fake transition.  Using the current
+        // viewport dimensions, assign each particle a destination along a vertical
+        // helix.  This mirrors the logic in resize() so that dnaTargets always
+        // reflects the current window size.  When the window resizes, resize()
+        // will rebuild dnaTargets again.
+        dnaTargets = new Array(count);
+        dnaEdges = [];
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        // Try to match Phase-3 DNA silhouette 1:1 by projecting real 3D DNA points to screen.
+        const dna3 = window.__dna;
+        const cam3 = window.__dnaCamera;
+        const THREE3 = window.__THREE;
+        if(dna3 && cam3 && THREE3){
+          try{
+            dna3.updateMatrixWorld(true);
+            cam3.updateMatrixWorld(true);
+
+            const pts3 = [];
+            dna3.traverse(obj=>{
+              if(obj && obj.isPoints && obj.geometry && obj.geometry.attributes && obj.geometry.attributes.position){
+                const arr = obj.geometry.attributes.position.array;
+                for(let k=0;k<arr.length;k+=3){
+                  pts3.push(new THREE3.Vector3(arr[k],arr[k+1],arr[k+2]));
+                }
+              }
+            });
+
+            const total = pts3.length;
+            if(total){
+              for(let ii=0; ii<count; ii++){
+                const src = pts3[Math.floor(ii / count * total)];
+                const v = src.clone().applyMatrix4(dna3.matrixWorld);
+                const ndc = v.project(cam3);
+                const x = (ndc.x * 0.5 + 0.5) * w;
+                const y = (-ndc.y * 0.5 + 0.5) * h;
+                dnaTargets[ii] = [x, y];
+              }
+            }
+          }catch(e){
+            // fall back to analytic helix below
+          }
+        }
+
+        // Fallback: analytic helix (close to Phase-3 framing)
+        if(!dnaTargets[0]){
+          const TAU = Math.PI * 2;
+          const helixTurns = 3.4;
+          const radiusPx = Math.min(w, h) * 0.19;
+          const verticalSpan = h * 0.92;
+          const wobbleY = radiusPx * 0.28;
+
+          for(let ii=0; ii<count; ii++){
+            const frac = ii / count;
+            const angle = frac * helixTurns * TAU;
+
+            const strandPhase = (ii % 2 === 0) ? 0 : Math.PI;
+
+            const waist = 0.78 + 0.22 * Math.sin((frac - 0.5) * Math.PI * 2);
+            const r = radiusPx * waist;
+
+            const xOff = Math.cos(angle + strandPhase) * r;
+            const yOff = Math.sin(angle + strandPhase) * wobbleY;
+
+            const vertical = (frac - 0.5) * verticalSpan;
+
+            const x = w / 2 + xOff;
+            const y = h / 2 + vertical + yOff;
+
+            dnaTargets[ii] = [x, y];
+          }
+        }
+
+        // Build a light DNA-like link set to fade in during the break
+        const maxLink = Math.min(w, h) * 0.22;
+        const maxLink2 = maxLink * maxLink;
+        const K = 3;
+        const seen = new Set();
+        for(let i=0;i<count;i++){
+          const ax = dnaTargets[i][0], ay = dnaTargets[i][1];
+          const cand = [];
+          for(let j=0;j<count;j++){
+            if(i===j) continue;
+            const dx = dnaTargets[j][0]-ax, dy = dnaTargets[j][1]-ay;
+            const d2 = dx*dx + dy*dy;
+            if(d2 <= maxLink2) cand.push([j,d2]);
+          }
+          cand.sort((a,b)=>a[1]-b[1]);
+          let picked=0;
+          for(const [j] of cand){
+            const a = i<j? i+"|"+j : j+"|"+i;
+            if(seen.has(a)) continue;
+            seen.add(a);
+            dnaEdges.push([i,j]);
+            if(++picked>=K) break;
+          }
+        }
+      }
+      
+      // Precompute clean DNA edges for late-stage seamless finish (backbone + sparse rungs)
+      if(!window.__dnaEdgesClean || window.__dnaEdgesCleanCount !== count){
+        const idxs = Array.from({length: count}, (_,k)=>k);
+        idxs.sort((a,b)=>dnaTargets[a][1]-dnaTargets[b][1]); // vertical order along helix
+        const edgesClean = [];
+        for(let k=0;k<idxs.length-2;k++){
+          edgesClean.push([idxs[k], idxs[k+2]]);            // along each strand
+          if(k % 14 === 0) edgesClean.push([idxs[k], idxs[k+1]]); // sparse rungs
+        }
+        window.__dnaEdgesClean = edgesClean;
+        window.__dnaEdgesCleanCount = count;
+      }
+
+// update swirl time
+      swirlTime += dt;
+      // compute target ring positions for each particle
+      const ringPositions = new Array(count);
+      const isMobile = window.innerWidth <= 768;
+      const centers = isMobile ? CFG.centersMobile : CFG.centersDesktop;
+      const radii = isMobile ? CFG.ringRadiusMobile : CFG.ringRadiusDesktop;
+      const ringSizeLocal = Math.floor(count / CFG.ringCount);
+      for(let i=0; i<count; i++){
+        const ringIndex = i % CFG.ringCount;
+        const ord = Math.floor(i / CFG.ringCount);
+        // base angle evenly spaced around circle
+        let angle = (ord / ringSizeLocal) * Math.PI * 2;
+        // swirl rotation alternating direction per ring
+        const dir = (ringIndex % 2 === 0 ? 1 : -1);
+        angle += swirlTime * CFG.swirlSpeed * dir;
+        // radial jitter using per-particle noise
+        let radial = radii[ringIndex];
+        radial *= 1 + (noiseArr[i] - 0.5) * 2 * CFG.jitter;
+        // Apply focus scaling: expand the active ring slightly and shrink others
+        const stepFocus = window.__ringStep;
+        const isFocus = (stepFocus !== null && stepFocus === ringIndex);
+        const focusScale = (stepFocus === null) ? 1 : (isFocus ? 1.18 : 0.78);
+        radial *= focusScale;
+        // compute center in pixels
+        const cx = centers[ringIndex].x * window.innerWidth;
+        const cy = centers[ringIndex].y * window.innerHeight;
+        const depthScale = depthArr[i];
+        const x = cx + Math.cos(angle) * radial;
+        const y = cy + Math.sin(angle) * radial * depthScale;
+        ringPositions[i] = [x, y];
+      }
+      // update phase2.rings centers so link anchors follow our custom ring positions
+      if(ph2.rings && ph2.rings.length >= CFG.ringCount){
+        for(let r=0; r<CFG.ringCount; r++){
+          const cx = centers[r].x * window.innerWidth;
+          const cy = centers[r].y * window.innerHeight;
+          ph2.rings[r].cx = cx;
+          ph2.rings[r].cy = cy;
+          ph2.rings[r].R  = radii[r];
+        }
+      }
+      // Precompute blended positions (cluster -> ring)
+      const clamp01 = v => Math.max(0, Math.min(1, v));
+      const easeIn = t => t * t;
+      const easeOut = t => 1 - (1 - t) * (1 - t);
+      const positions = new Array(count);
+      for(let i=0; i<count; i++){
+        const p1 = ph1.particles[i];
+        const ringPos = ringPositions[i];
+        // Determine the intermediate position between the ring and the DNA target.
+        // When breakProg=0, dnaPos equals ringPos; when breakProg=1, dnaPos equals
+        // the precomputed DNA target for this particle (if available).  Fallback to
+        // ringPos when dnaTargets is undefined or missing.
+        // --- Ring → DNA transition: longer shatter + 2-step gather ---
+        const ringIndex = i % CFG.ringCount;
+
+        // slightly longer stagger per ring
+        const ringDelay = ringIndex * 0.14; // longer per-ring stagger (more time)
+
+        const localT = clamp01((breakProg - ringDelay) / (1 - ringDelay));
+
+        // longer "shatter" portion before gathering into DNA
+        const shatterPortion = 0.60; // longer shatter before gather
+        const shatterT = Math.min(1, localT / shatterPortion);
+        const gatherT  = Math.max(0, (localT - shatterPortion) / (1 - shatterPortion));
+
+        const eShatter = easeInOut(shatterT); // smoother than easeOut
+        // slow the DNA assembly stage without changing final shape
+        const gatherSlow = Math.pow(gatherT, 2.0); // much slower assembly start
+        const eGather  = easeInOut(gatherSlow);
+
+        const cx = centers[ringIndex].x * window.innerWidth;
+        const cy = centers[ringIndex].y * window.innerHeight;
+
+        // slight pre-compress before shatter to add tension
+        const preC = 1 - 0.07 * easeIn(shatterT);
+        const ringBase = [
+          cx + (ringPos[0] - cx) * preC,
+          cy + (ringPos[1] - cy) * preC,
+        ];
+
+        // tangent unit vector for shatter (along the ring)
+        const vx = ringBase[0] - cx, vy = ringBase[1] - cy;
+        const vlen = Math.hypot(vx, vy) || 1;
+        const tx = -vy / vlen, ty = vx / vlen;
+        const dir = (ringIndex % 2 === 0) ? 1 : -1;
+
+        const tangentX = tx * dir, tangentY = ty * dir;
+        const shatterAmp = Math.min(70, vlen * 0.28);
+        const settleT = easeInOutQuint(clamp01((breakProg - 0.82) / 0.18));
+        const jitterAmp  = shatterAmp * 0.12 * (1 - settleT);
+        const jAng = (noiseArr[i] - 0.5) * Math.PI * 2;
+        const jx = Math.cos(jAng), jy = Math.sin(jAng);
+
+        const shatterPos = [
+          ringBase[0] + tangentX * shatterAmp * eShatter + jx * jitterAmp * eShatter,
+          ringBase[1] + tangentY * shatterAmp * eShatter + jy * jitterAmp * eShatter,
+        ];
+
+        const tgt = (dnaTargets && dnaTargets[i]) ? dnaTargets[i] : ringPos;
+
+        // ===== 2-step gather (more detailed assembly) =====
+        const g1 = easeInOut(Math.min(1, gatherSlow / 0.70));
+        const g2 = easeInOut(Math.max(0, (gatherSlow - 0.70) / 0.30));
+
+        const spinePos = [
+          shatterPos[0] * (1 - g1) + tgt[0] * g1,
+          shatterPos[1],
+        ];
+
+        let dnaPos = [
+          spinePos[0],
+          spinePos[1] * (1 - g2) + tgt[1] * g2,
+        ];
+// Blend between the original cluster position and the intermediate (ring→DNA) position.
+        const x = p1.position.x * (1 - prog) + dnaPos[0] * prog;
+        const y = p1.position.y * (1 - prog) + dnaPos[1] * prog;
+        positions[i] = [x, y];
+      }
+      ctx.globalCompositeOperation = 'screen';
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--impro-line').trim() || 'rgba(230,230,230,0.32)';
+      ctx.lineWidth = 1;
+      // Draw cluster edges fading out
+      const clusterEdges = ph1.edgeState;
+      for(const [key, st] of clusterEdges){
+        if(st.w <= 0.02) continue;
+        const parts = key.split('|');
+        const i = Number(parts[0]);
+        const j = Number(parts[1]);
+        if(i >= count || j >= count) continue;
+        const alpha = st.w * (1 - prog) * 0.6;
+        if(alpha <= 0.003) continue;
+        ctx.globalAlpha = alpha;
+        const a = positions[i];
+        const b = positions[j];
+        ctx.beginPath();
+        ctx.moveTo(a[0], a[1]);
+        ctx.lineTo(b[0], b[1]);
+        ctx.stroke();
+      }
+      
+      // Draw DNA-like edges during break, progressively cleaning to match final Phase-3 helix
+      const dnaFade = easeInOutQuint(clamp01((breakProg - 0.12) / 0.88));
+      const cleanBlend = easeInOutQuint(clamp01((breakProg - 0.70) / 0.28)); // earlier clean-up
+      if(dnaFade > 0.003){
+        // Web (KNN) edges fade OUT as we approach the end
+        const webAlpha = dnaFade * 0.55 * (1 - cleanBlend);
+        if(webAlpha > 0.002 && dnaEdges && dnaEdges.length){
+          ctx.globalAlpha = webAlpha;
+          for(const edge of dnaEdges){
+            const i = edge[0], j = edge[1];
+            if(i >= count || j >= count) continue;
+            const a = positions[i];
+            const b = positions[j];
+            ctx.beginPath();
+            ctx.moveTo(a[0], a[1]);
+            ctx.lineTo(b[0], b[1]);
+            ctx.stroke();
+          }
+        }
+
+        // Clean helix backbone edges fade IN (removes extra connectors)
+        const cleanEdges = window.__dnaEdgesClean;
+        const cleanAlpha = dnaFade * 0.65 * cleanBlend;
+        if(cleanAlpha > 0.002 && cleanEdges && cleanEdges.length){
+          ctx.globalAlpha = cleanAlpha;
+          for(const edge of cleanEdges){
+            const i = edge[0], j = edge[1];
+            if(i >= count || j >= count) continue;
+            const a = positions[i];
+            const b = positions[j];
+            ctx.beginPath();
+            ctx.moveTo(a[0], a[1]);
+            ctx.lineTo(b[0], b[1]);
+            ctx.stroke();
+          }
+        }
+      }
+
+// Determine focus alpha per ring for edges and dots
+      const stepSel = window.__ringStep;
+      const ringOf = idx => idx % CFG.ringCount;
+      const focusAlpha = ri => {
+        if(stepSel === null) return 1;
+        return (ri === stepSel ? 1.0 : 0.22);
+      };
+      const localBreakForRing = (ri) => {
+        const ringDelay = ri * 0.08;
+        return clamp01((breakProg - ringDelay) / (1 - ringDelay));
+      };
+      // Draw ring edges fading in using precomputed ringEdges
+      for(const edge of ringEdges){
+        const i = edge[0];
+        const j = edge[1];
+        if(i >= count || j >= count) continue;
+        // Fade ring edges in with prog, then out again with breakProg.  When breakProg
+        // reaches 1 the edges are fully invisible.
+        const edgeBreak = Math.max(localBreakForRing(ringOf(i)), localBreakForRing(ringOf(j)));
+        const baseAlpha = prog * 0.6 * (1 - crossEase * 0.9);
+        const focusAvg = (focusAlpha(ringOf(i)) + focusAlpha(ringOf(j))) / 2;
+        const alpha = baseAlpha * (1 - edgeBreak) * focusAvg;
+        if(alpha <= 0.003) continue;
+        ctx.globalAlpha = alpha;
+        const a = positions[i];
+        const b = positions[j];
+        ctx.beginPath();
+        ctx.moveTo(a[0], a[1]);
+        ctx.lineTo(b[0], b[1]);
+        ctx.stroke();
+      }
+      // Draw particles, size blending between scenes
+      for(let i=0; i<count; i++){
+        const [x, y] = positions[i];
+        const s1 = ph1.particles[i].size;
+        const p2 = ph2.particles[i];
+        // compute size in phase2 similar to its draw method: base size times depth scaling
+        // approximate by using p2.size and z scaling factor
+        const zScale = (p2.z !== undefined) ? (0.9 + 0.35 * (p2.z - 0.65)) : 1;
+        const s2 = p2.size * zScale;
+        const size = s1 * (1 - prog) + s2 * prog;
+        // alpha for dots gradually increases and is modulated by focusAlpha
+        const ri = i % CFG.ringCount;
+        const stepSelDot = window.__ringStep;
+        const focusAlphaDot = (stepSelDot === null) ? 1 : (ri === stepSelDot ? 1.0 : 0.22);
+        // As the break transition progresses, fade dots out so they don't clutter
+        // the DNA view.  Multiply the base alpha by (1 - breakProg) and focusAlphaDot.
+        const dotBreak = localBreakForRing(ringOf(i));
+        const alphaDot = (0.42 + 0.38 * prog) * focusAlphaDot * (1 - dotBreak * 0.35) * (1 - crossEase * 0.7);
+        ctx.globalAlpha = alphaDot;
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--impro-dot').trim() || 'rgba(255,255,255,0.85)';
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      // Update ring anchors and fade them in based on progress
+      if(ph2.links && ph2.links.length){
+        // update anchor positions within phase2 (their own method calculates ring coherence)
+        ph2.updateAnchors();
+        const linkLayer = ph2.linkLayer;
+        if(linkLayer){
+          // fade in link layer after ~50% scroll
+          let anchorAlpha = Math.min(1, Math.max(0, (prog - 0.5) / 0.5));
+          // Fade anchors out during the break transition so they don't overlap the DNA view
+          anchorAlpha = anchorAlpha * (1 - breakProg);
+          linkLayer.style.opacity = anchorAlpha.toFixed(3);
+          linkLayer.style.pointerEvents = anchorAlpha > 0.2 ? 'auto' : 'none';
+        }
+      }
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+  })();
+  </script>
+  <!-- Scroll snap controller for 3 screens -->
+  <script>
+  // ===== Scroll snap controller (3 screens: phase1, rings, DNA) =====
+  (function(){
+    const page = document.querySelector('.page');
+    if(!page) return;
+    const SNAP_POINTS = [0, 0.5, 1];
+    const SNAP_THRESHOLD = 0.06;
+    const IDLE_DELAY = 140;
+    const MIN_DUR = 450, MAX_DUR = 900;
+    let idleTimer = null;
+    let snapping = false;
+    let snapRAF = null;
+    let userAbort = false;
+    let lastScrollY = window.scrollY;
+    const clamp01 = v => Math.max(0, Math.min(1, v));
+    const easeInOutCubic = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+    function metrics(){
+      const rect = page.getBoundingClientRect();
+      const scrollY = window.scrollY || window.pageYOffset;
+      const start = scrollY + rect.top;
+      const range = Math.max(1, page.offsetHeight - window.innerHeight);
+      return { start, range };
+    }
+    function currentProgress(){
+      const { start, range } = metrics();
+      return clamp01((window.scrollY - start) / range);
+    }
+    function nearestPoint(p){
+      let best = SNAP_POINTS[0], bestD = Infinity;
+      for(const sp of SNAP_POINTS){
+        const d = Math.abs(sp - p);
+        if(d < bestD){ bestD = d; best = sp; }
+      }
+      return { best, bestD };
+    }
+    function scrollToProgress(targetP){
+      const { start, range } = metrics();
+      const targetY = start + targetP * range;
+      const fromY = window.scrollY;
+      const distP = Math.abs(targetP - currentProgress());
+      const dur = Math.max(MIN_DUR, Math.min(MAX_DUR, MIN_DUR + distP * 1200));
+      const t0 = performance.now();
+      snapping = true;
+      userAbort = false;
+      function step(t){
+        if(userAbort){ snapping = false; return; }
+        const k = clamp01((t - t0)/dur);
+        const e = easeInOutCubic(k);
+        window.scrollTo(0, fromY + (targetY - fromY) * e);
+        if(k < 1){
+          snapRAF = requestAnimationFrame(step);
+        } else {
+          snapping = false;
+        }
+      }
+      snapRAF = requestAnimationFrame(step);
+    }
+    function scheduleSnap(){
+      if(snapping) return;
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        const p = currentProgress();
+
+        // --- IMPORTANT: don't snap back during rings→DNA transition ---
+        // phase2 (rings) ends at ~0.5; after that we let the transition play freely.
+        if (p > 0.54 && p < 0.94) return;
+
+        // before 0.54 we snap to 0 or 0.5; after 0.94 we only snap to 1
+        if (p >= 0.94){
+          scrollToProgress(1);
+          return;
+        }
+
+        const { best, bestD } = nearestPoint(p);
+        if(bestD > SNAP_THRESHOLD){
+          scrollToProgress(best);
+        }
+      }, IDLE_DELAY);
+    }
+    ['wheel','touchstart','keydown','pointerdown'].forEach(ev=>{
+      window.addEventListener(ev, () => { userAbort = true; }, { passive:true });
+    });
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      if(!snapping && Math.abs(y - lastScrollY) > 0.5) scheduleSnap();
+      lastScrollY = y;
+    }, { passive:true });
+    window.addEventListener('load', scheduleSnap);
+  })();
+  </script>
+
+  <!-- Ring overlay interactions and content -->
+  <script>
+  (function(){
+    const overlay = document.querySelector('.ring-overlay');
+    const linkLayer = document.querySelector('[data-link-layer]');
+    if(!overlay) return;
+    // Content for each direction
+    const RING_CONTENT = [
+      {
+        title: "Перфоманс",
+        list: [
+          "Контекст + таргет",
+          "Медиаплан и гипотезы",
+          "Креативы под конверсию",
+          "Оптимизация CPL/CPA",
+          "ROMI и сквозная аналитика"
+        ]
+      },
+      {
+        title: "Контент",
+        list: [
+          "Контент-стратегия",
+          "Reels / Shorts / TikTok",
+          "Сценарии под ИИ-аватары",
+          "Дизайн-система контента",
+          "Комьюнити и UGC"
+        ]
+      },
+      {
+        title: "Веб и MarTech",
+        list: [
+          "Сайты / лендинги / Tilda",
+          "MarTech-стек под задачу",
+          "CRM (Bitrix/amo) + интеграции",
+          "TG-боты и автоматизации",
+          "BI-дашборды и трекинг"
+        ]
+      },
+      {
+        title: "Брендинг",
+        list: [
+          "Позиционирование",
+          "Нейминг и айдентика",
+          "Брендбук / гайдлайны",
+          "Упаковка продукта",
+          "Коммуникационная платформа"
+        ]
+      },
+      {
+        title: "Стратегия",
+        list: [
+          "Маркетинг-аудит",
+          "Сегментация / JTBD",
+          "Оффер и UVP",
+          "Go-to-Market",
+          "Roadmap внедрения"
+        ]
+      }
+    ];
+    // Render overlay for given index
+    function renderOverlay(idx){
+      const data = RING_CONTENT[idx];
+      overlay.querySelector('.ring-overlay__title').textContent = data.title;
+      const ul = overlay.querySelector('.ring-overlay__list');
+      ul.innerHTML = data.list.map(x => `<li>${x}</li>`).join('');
+      overlay.classList.add('is-visible');
+    }
+    // Initialize hidden state
+    overlay.classList.remove('is-visible');
+    // Bind click to ring labels
+    if(linkLayer){
+      linkLayer.addEventListener('click', (e) => {
+        const a = e.target.closest('a');
+        if(!a) return;
+        let idx = Number(a.dataset.ring);
+        if(Number.isNaN(idx)){
+          const all = Array.from(linkLayer.querySelectorAll('a'));
+          idx = all.indexOf(a);
+        }
+        if(idx >= 0 && idx < RING_CONTENT.length){
+          e.preventDefault();
+          window.__ringStep = idx;
+          renderOverlay(idx);
+        }
+      });
+    }
+    // Hide overlay and reset ringStep outside of ring zone
+    window.addEventListener('scroll', () => {
+      const page = document.querySelector('.page');
+      if(!page) return;
+      const rect = page.getBoundingClientRect();
+      const scrollY = window.scrollY;
+      const start = scrollY + rect.top;
+      const range = Math.max(1, page.offsetHeight - window.innerHeight);
+      const p = Math.max(0, Math.min(1, (scrollY - start) / range));
+      if(p < 0.5 || p >= 1){
+        overlay.classList.remove('is-visible');
+        window.__ringStep = null;
+      }
+    }, { passive:true });
+  })();
+  </script>
+
+  <!--
+    Import map для three.js и его аддонов, необходимых для отрисовки 3D‑структуры ДНК.
+    Эти URL‑адреса остаются неизменными, как в исходном файле «Фаза 2 (1).html».
+  -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <!--
+    Модуль three.js, отвечающий за генерацию и отображение спирали ДНК.
+    Код полностью заимствован из «Фаза 2 (1).html» и не модифицировался.
+  -->
+  <script type="module">
+    import * as THREE from 'three';
+    import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+    import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+    import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+
+    // DNA configuration identical to the standalone reference.
+    const CONFIG = {
+      RNG_SEED: 1337,
+      LENGTH_MULTIPLIER: 2.0,
+      BASE_TURNS: 12,
+      RADIUS: 2.6,
+      PITCH_BASE: 0.55,
+      STRETCH_FACTOR: 5.0,
+      PTS_PER_HELIX: 2400,
+      SCATTER_R: 0.42,
+      POINT_SIZE: 0.204,
+      LINK_DIST: 1.0,
+      LINK_WIDTH: 1.17,
+      LINK_DOTS_PER_SEG: 2,
+      LINES_PER_TURN: 10,
+      INTER_GROUP_GAP_PX: 500,
+      CAMERA_PAD: 0.1,
+      CAMERA_ZOOM: 0.6,
+      COLORS: { INK: 0xe9edf2 },
+      OPACITY: {
+        POINTS: 0.88,
+        LINKS: 0.18,
+        KNN:   0.18,
+        XDIAG: 0.16,
+        RUNG_WEB: 0.16,
+        RUNGS: 0.0
+      }
+    };
+    const PITCH = CONFIG.PITCH_BASE * CONFIG.STRETCH_FACTOR;
+    const TURNS = Math.round(CONFIG.BASE_TURNS * CONFIG.LENGTH_MULTIPLIER);
+
+    function mulberry32(seed){ return function(){ let t = seed += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+    const rand = mulberry32(CONFIG.RNG_SEED|0);
+    const randRange = (a,b)=> a + (b-a)*rand();
+
+    class HelixCurve extends THREE.Curve {
+      constructor(radius, pitch, turns, phase=0){ super(); this.radius=radius; this.pitch=pitch; this.turns=turns; this.phase=phase; this.turnLen=2*Math.PI*turns; }
+      getPoint(t, out=new THREE.Vector3()){ const u=t*this.turnLen, a=u+this.phase; return out.set(this.radius*Math.cos(a), this.radius*Math.sin(a), this.pitch*u); }
+      getTangent(t, out=new THREE.Vector3()){ const u=t*this.turnLen, a=u+this.phase; return out.set(-this.radius*Math.sin(a), this.radius*Math.cos(a), this.pitch).normalize(); }
+    }
+    function localFrame(curve, t){
+      const p=curve.getPoint(t), tan=curve.getTangent(t), up=new THREE.Vector3(0,0,1);
+      let normal = new THREE.Vector3().crossVectors(tan, up); if(normal.lengthSq()<1e-5) normal.set(1,0,0); normal.normalize();
+      const bin = new THREE.Vector3().crossVectors(tan, normal).normalize();
+      return { p, tan, normal, bin };
+    }
+    function generateStratifiedHelixPoints(curve, count, scatterR){
+      const pts=[]; const cell=0.14; const minD2=0.085**2; const grid=new Map();
+      const neigh=[]; for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) for(let dz=-1;dz<=1;dz++) neigh.push([dx,dy,dz]);
+      const key=(x,y,z)=>`${Math.floor(x/cell)}|${Math.floor(y/cell)}|${Math.floor(z/cell)}`;
+      function fits(p){
+        const cx=Math.floor(p.x/cell), cy=Math.floor(p.y/cell), cz=Math.floor(p.z/cell);
+        for(const [dx,dy,dz] of neigh){ const arr=grid.get(`${cx+dx}|${cy+dy}|${cz+dz}`); if(!arr) continue; for(const q of arr){ if(p.distanceToSquared(q) < minD2) return false; } }
+        return true;
+      }
+      function add(p){
+        const k=key(p.x,p.y,p.z);
+        if(!grid.has(k)) grid.set(k,[]);
+        grid.get(k).push(p);
+        pts.push(p);
+      }
+      const N=count;
+      for(let i=0;i<N;i++){
+        let ok=false, tries=0;
+        while(!ok && tries<16){
+          const t=(i+rand())/N;
+          const { p, tan, normal, bin } = localFrame(curve, t);
+          const a=randRange(0,Math.PI*2), rr=Math.sqrt(rand());
+          const r=rr*scatterR, wiggle=(rand()-0.5)*0.02;
+          const cand=p.clone().addScaledVector(normal, Math.cos(a)*r).addScaledVector(bin, Math.sin(a)*r).addScaledVector(tan, wiggle);
+          if(fits(cand)){ add(cand); ok=true; break; }
+          tries++;
+        }
+        if(!ok){
+          const t=(i+0.5)/N;
+          const { p, normal }=localFrame(curve,t);
+          add(p.clone().addScaledVector(normal, scatterR*0.5));
+        }
+      }
+      return pts;
+    }
+    function makeCircleSprite(size=128){
+      const cvs = document.createElement('canvas');
+      cvs.width = cvs.height = size;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0,0,size,size);
+      ctx.fillStyle = '#e9edf2';
+      ctx.beginPath(); ctx.arc(size/2,size/2,size/2 - 1,0,Math.PI*2); ctx.closePath(); ctx.fill();
+      const tex = new THREE.CanvasTexture(cvs); tex.colorSpace = THREE.SRGBColorSpace; tex.generateMipmaps = true; return tex;
+    }
+    function makePoints(points){
+      const pos=new Float32Array(points.length*3);
+      for(let i=0;i<points.length;i++){ const p=points[i]; pos[i*3]=p.x; pos[i*3+1]=p.y; pos[i*3+2]=p.z; }
+      const g=new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+      const m=new THREE.PointsMaterial({ color: CONFIG.COLORS.INK, size: CONFIG.POINT_SIZE, sizeAttenuation:true, transparent:true, opacity:CONFIG.OPACITY.POINTS, depthWrite:false, depthTest:false, blending: THREE.NormalBlending, map: makeCircleSprite(128), alphaTest: 0.5, vertexColors:false });
+      const pts=new THREE.Points(g,m); pts.userData.type='points'; pts.renderOrder=100; pts.userData.basePositions=pos.slice(0);
+      return pts;
+    }
+    function line2FromPairs(pairs){
+      const arr=new Float32Array(pairs.length*6); let w=0;
+      for(const [a,b] of pairs){ arr[w++]=a.x; arr[w++]=a.y; arr[w++]=a.z; arr[w++]=b.x; arr[w++]=b.y; arr[w++]=b.z; }
+      const geom=new LineSegmentsGeometry(); geom.setPositions(arr);
+      const mat=new LineMaterial({ color: CONFIG.COLORS.INK, transparent:true, opacity: CONFIG.OPACITY.LINKS, linewidth: CONFIG.LINK_WIDTH, depthWrite:false, depthTest:false, blending: THREE.NormalBlending });
+      const obj=new LineSegments2(geom,mat); obj.material.resolution.set(innerWidth, innerHeight); obj.renderOrder=20; obj.userData.basePositions=arr.slice(0);
+      return obj;
+    }
+    function localLinks(points){
+      const cell=CONFIG.LINK_DIST; const key=(x,y,z)=>`${Math.floor(x/cell)}|${Math.floor(y/cell)}|${Math.floor(z/cell)}`; const grid=new Map();
+      for(let i=0;i<points.length;i++){ const p=points[i]; const k=key(p.x,p.y,p.z); (grid.get(k)??grid.set(k,[]).get(k)).push(i); }
+      const neigh=[]; for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) for(let dz=-1;dz<=1;dz++) neigh.push([dx,dy,dz]);
+      const maxD2=CONFIG.LINK_DIST*CONFIG.LINK_DIST; const used=new Uint8Array(points.length); const seg=[]; const order=[...Array(points.length).keys()].sort((i,j)=>points[j].z-points[i].z);
+      for(const i of order){ if(used[i]) continue; const p=points[i]; const cx=Math.floor(p.x/cell), cy=Math.floor(p.y/cell), cz=Math.floor(p.z/cell); let best=-1, bd=Infinity;
+        for(const [dx,dy,dz] of neigh){ const b=grid.get(`${cx+dx}|${cy+dy}|${cz+dz}`); if(!b) continue; for(const j of b){ if(j===i||used[j]) continue; const q=points[j]; if(q.z>=p.z-1e-6) continue; const d2=p.distanceToSquared(q); if(d2<=maxD2 && d2<bd){ bd=d2; best=j; } } } if(best>=0){ used[i]=1; used[best]=1; seg.push([points[i], points[best]]); } }
+      return seg;
+    }
+    function knn(points, K=8, rMax=1.6){
+      const cell=rMax; const key=(x,y,z)=>`${Math.floor(x/cell)}|${Math.floor(y/cell)}|${Math.floor(z/cell)}`; const grid=new Map();
+      for(let i=0;i<points.length;i++){ const p=points[i]; const k=key(p.x,p.y,p.z); (grid.get(k)??grid.set(k,[]).get(k)).push(i); }
+      const neigh=[]; for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) for(let dz=-1;dz<=1;dz++) neigh.push([dx,dy,dz]);
+      const maxD2=rMax*rMax; const edges=[]; const deg=new Map();
+      for(let i=0;i<points.length;i++){
+        const p=points[i]; const cx=Math.floor(p.x/cell), cy=Math.floor(p.y/cell), cz=Math.floor(p.z/cell);
+        const cand=[]; for(const [dx,dy,dz] of neigh){ const b=grid.get(`${cx+dx}|${cy+dy}|${cz+dz}`); if(!b) continue; for(const j of b){ if(j===i) continue; const q=points[j]; const d2=p.distanceToSquared(q); if(d2<=maxD2) cand.push({j,d2}); }} cand.sort((a,b)=>a.d2-b.d2);
+        let picked=0; for(const c of cand){ if(picked>=K) break; const j=c.j; const di=deg.get(i)||0; const dj=deg.get(j)||0; if(di>=8 || dj>=8) continue; const kk=i<j?`${i}|${j}`:`${j}|${i}`; if(edges.find(e=>e.k===kk)) continue; edges.push({i,j,k:kk}); deg.set(i,di+1); deg.set(j,dj+1); picked++; }
+      }
+      return edges.map(e=>[points[e.i], points[e.j]]);
+    }
+    function diag(left,right, dMax=1.6){
+      const idxR=right.map((p,i)=>({i,z:p.z})).sort((a,b)=>a.z-b.z);
+      const lenZ=2*Math.PI*TURNS*PITCH; const dZmax=0.12*lenZ; const out=[]; function zr(z){ let l=0, r=idxR.length-1; while(l<=r){ const m=(l+r>>1); if(idxR[m].z < z - dZmax) l=m+1; else r=m-1; } const start=l; l=0; r=idxR.length-1; while(l<=r){ const m=(l+r>>1); if(idxR[m].z <= z + dZmax) l=m+1; else r=m-1; } const end=Math.max(start, r); return [start, Math.min(idxR.length-1, end)]; }
+      for(let i=0;i<left.length;i++){ const p=left[i]; const [s,e]=zr(p.z); let bestJ=-1, bestD2=Infinity; for(let k=s;k<=e;k++){ const j=idxR[k].i; const q=right[j]; const d2=p.distanceToSquared(q); if(d2<bestD2 && d2<=dMax*dMax){ bestD2=d2; bestJ=j; } } if(bestJ>=0) out.push([p,right[bestJ]]); }
+      return out;
+    }
+    function line2(pairs, opacity){
+      const arr=new Float32Array(pairs.length*6); let w=0; for(const [a,b] of pairs){ arr[w++]=a.x; arr[w++]=a.y; arr[w++]=a.z; arr[w++]=b.x; arr[w++]=b.y; arr[w++]=b.z; }
+      const geom=new LineSegmentsGeometry(); geom.setPositions(arr);
+      const mat=new LineMaterial({ color: CONFIG.COLORS.INK, transparent:true, opacity, linewidth: CONFIG.LINK_WIDTH, depthWrite:false, depthTest:false, blending: THREE.NormalBlending });
+      const obj=new LineSegments2(geom,mat); obj.material.resolution.set(innerWidth, innerHeight); obj.renderOrder=21; return obj;
+    }
+    function buildDNA(){
+      const container = new THREE.Group(); container.userData.type='dnaContainer';
+      const helixA=new HelixCurve(CONFIG.RADIUS, PITCH, TURNS, 0.0);
+      const helixB=new HelixCurve(CONFIG.RADIUS, PITCH, TURNS, Math.PI);
+      const leftPts = generateStratifiedHelixPoints(helixA, CONFIG.PTS_PER_HELIX, CONFIG.SCATTER_R);
+      const rightPts= generateStratifiedHelixPoints(helixB, CONFIG.PTS_PER_HELIX, CONFIG.SCATTER_R);
+      container.add( makePoints(leftPts.concat(rightPts)) );
+      container.add( line2FromPairs(localLinks(leftPts)) );
+      container.add( line2FromPairs(localLinks(rightPts)) );
+      const knnL = line2(knn(leftPts, 10, 1.6), CONFIG.OPACITY.KNN); knnL.userData.type='knnLinks'; container.add(knnL);
+      const knnR = line2(knn(rightPts,10, 1.6), CONFIG.OPACITY.KNN); knnR.userData.type='knnLinks'; container.add(knnR);
+      const xdiag = line2(diag(leftPts, rightPts, 1.6), CONFIG.OPACITY.XDIAG); xdiag.userData.type='xdiagLinks'; container.add(xdiag);
+      return container;
+    }
+    const canvas = document.getElementById('dnaCanvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference:'high-performance' });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setClearColor(0x0b0e12, 1);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 8000);
+    camera.up.set(0,0,1);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.25); dir.position.set(3,-5,7); scene.add(dir);
+    const dna = buildDNA();
+    scene.add(dna);
+
+    // Expose DNA & camera to the 2D unified renderer (for 1:1 proxy targets)
+    window.__dna = dna;
+    window.__dnaCamera = camera;
+    window.__dnaRenderer = renderer;
+    window.__THREE = THREE;
+    function frameCameraToDNASilhouette(){
+      const bbox = new THREE.Box3().expandByObject(dna);
+      const width  = bbox.max.x - bbox.min.x;
+      const height = bbox.max.z - bbox.min.z;
+      const zMid   = (bbox.min.z + bbox.max.z) * 0.5;
+      const vFOV   = THREE.MathUtils.degToRad(camera.fov);
+      const byH    = (height/2) / Math.tan(vFOV/2);
+      const byW    = (width/2)  / (Math.tan(vFOV/2) * camera.aspect);
+      const dist   = Math.max(byH, byW) * (CONFIG.CAMERA_PAD || 1) * (CONFIG.CAMERA_ZOOM || 1);
+      const target = new THREE.Vector3(0, 0, zMid);
+      camera.position.set(0, dist, zMid);
+      camera.lookAt(target);
+      dna.position.x = 0;
+    }
+    frameCameraToDNASilhouette();
+    let isSpinning = true;
+    let TWIST_SPEED = 0.12;
+    let lastT = performance.now();
+    function render(){
+      const now = performance.now();
+      const dt = Math.min(0.05, (now - lastT) / 1000);
+      lastT = now;
+      if(isSpinning){ dna.rotation.z += TWIST_SPEED * dt; }
+      renderer.setSize(innerWidth, innerHeight, false);
+      camera.aspect = innerWidth/innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.render(scene, camera);
+      requestAnimationFrame(render);
+    }
+    render();
+    window.addEventListener('resize', () => {
+      renderer.setSize(innerWidth, innerHeight);
+      camera.aspect = innerWidth/innerHeight;
+      camera.updateProjectionMatrix();
+      scene.traverse(o => { const m=o.material; if(m && m.isLineMaterial && m.resolution){ m.resolution.set(innerWidth, innerHeight); }});
+      frameCameraToDNASilhouette();
+    });
+    // DNA spins automatically; no controls or HUD
+  </script>
+
+  <script>
+  // === Safe overlay close logic (does not alter ring/DNA render) ===
+  (function(){
+    const overlay = document.querySelector('.ring-overlay');
+    if(!overlay) return;
+    function hideOverlay(){
+      overlay.classList.remove('is-visible');
+      overlay.setAttribute('aria-hidden','true');
+      window.__ringStep = null;
+    }
+    document.addEventListener('pointerdown', (e)=>{
+      if(!overlay.classList.contains('is-visible')) return;
+      if(e.target.closest('.ring-overlay')) return;
+      if(e.target.closest('[data-link-layer] a')) return;
+      hideOverlay();
+    }, { passive:true });
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape') hideOverlay();
+    });
+  })();
+  </script>
+
+</body>
+</html>
