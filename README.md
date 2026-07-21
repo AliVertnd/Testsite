@@ -17,6 +17,7 @@
 | Модель расчёта | [catalog/cost-model.md](catalog/cost-model.md) |
 | Комплексы (сумма атомов) | [catalog/complexes.md](catalog/complexes.md) |
 | CSV для Excel / CRM | [catalog/microservices-master.csv](catalog/microservices-master.csv) |
+| Витрина полных карточек (17 полей) | [catalog/sample-full-cards.md](catalog/sample-full-cards.md) |
 
 ## Принцип
 
