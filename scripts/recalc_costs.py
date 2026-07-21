@@ -236,6 +236,12 @@ def main():
     svcs += parse_file(BASE / "marketing-microservices.md", "M")
     svcs += parse_file(BASE / "it-microservices.md", "IT")
     svcs += parse_file(BASE / "consulting-microservices.md", "C")
+    new_dir = BASE / "new-directions-microservices.md"
+    if new_dir.exists():
+        svcs += parse_file(new_dir, "N")
+        for s in svcs:
+            if s["id"].startswith("N-"):
+                s["domain"] = "marketing"
 
     fields = list(svcs[0].keys())
     with open(OUT / "microservices-master.csv", "w", newline="", encoding="utf-8") as f:

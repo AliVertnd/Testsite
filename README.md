@@ -2,20 +2,28 @@
 
 Единый каталог **атомарных** услуг агентства (маркетинг + IT + консалтинг) для рынка РФ.
 
-**273 микроуслуги** с карточками, рыночными ценами, трудоёмкостью, себестоимостью и рекомендуемой ценой Impro.
+**308 микроуслуг** (273 базовых + 35 новых: AI SEO, GEO, PR, Telegram Ads, Авито, внедрение ИИ).
+
+## Порядок работы (важно)
+
+1. **Сначала** — отдельные услуги по направлениям (SEO, AI SEO, GEO, PR, Директ, разработка…)  
+2. **Потом** — комплексы для продажи (пока отложены)
 
 ## Быстрый старт
 
 | Что нужно | Куда смотреть |
 |---|---|
+| Что реально продают на рынке + линейки | [catalog/01-services-by-direction.md](catalog/01-services-by-direction.md) |
+| Каталог отдельных услуг по направлениям | [catalog/02-services-catalog.md](catalog/02-services-catalog.md) |
 | Полный индекс + цены | [catalog/INDEX.md](catalog/INDEX.md) |
 | Карточки маркетинга (118) | [research/marketing-microservices.md](research/marketing-microservices.md) |
 | Карточки IT (90) | [research/it-microservices.md](research/it-microservices.md) |
 | Карточки консалтинга (65) | [research/consulting-microservices.md](research/consulting-microservices.md) |
+| AI SEO / GEO / PR / ИИ (35) | [research/new-directions-microservices.md](research/new-directions-microservices.md) |
 | Ставки часа специалистов | [research/hourly-rates-rf.md](research/hourly-rates-rf.md) |
 | Себестоимость по услугам | [catalog/services-cost-table.md](catalog/services-cost-table.md) |
 | Модель расчёта | [catalog/cost-model.md](catalog/cost-model.md) |
-| Комплексы (сумма атомов) | [catalog/complexes.md](catalog/complexes.md) |
+| Комплексы | [catalog/complexes.md](catalog/complexes.md) — **черновик, этап позже** |
 | CSV для Excel / CRM | [catalog/microservices-master.csv](catalog/microservices-master.csv) |
 | Витрина полных карточек (17 полей) | [catalog/sample-full-cards.md](catalog/sample-full-cards.md) |
 
