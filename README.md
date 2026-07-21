@@ -15,6 +15,7 @@
 |---|---|
 | Что реально продают на рынке + линейки | [catalog/01-services-by-direction.md](catalog/01-services-by-direction.md) |
 | Каталог отдельных услуг по направлениям | [catalog/02-services-catalog.md](catalog/02-services-catalog.md) |
+| Полноценные услуги с рынка под Impro | [catalog/03-full-services-market-fit.md](catalog/03-full-services-market-fit.md) |
 | Полный индекс + цены | [catalog/INDEX.md](catalog/INDEX.md) |
 | Карточки маркетинга (118) | [research/marketing-microservices.md](research/marketing-microservices.md) |
 | Карточки IT (90) | [research/it-microservices.md](research/it-microservices.md) |
