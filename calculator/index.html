@@ -350,12 +350,13 @@
         <input type="search" id="fixSearch" placeholder="Поиск пакета…" />
         <select id="fixGroup">
           <option value="">Все группы</option>
+          <option>Локомотив</option>
+          <option>Retainer</option>
           <option>Performance</option>
           <option>Поиск / AI / GEO</option>
           <option>Аналитика / CRO</option>
           <option>Веб / MarTech</option>
           <option>Стратегия</option>
-          <option>Репутация / ИИ</option>
         </select>
         <select id="fixTier">
           <option value="S">Цена S</option>
@@ -421,60 +422,41 @@
 
   <script>
     const TRIGGERS = [
-      { id: "P1", title: "Выводим новую линейку / продукт", depth: "Full GTM: смысл → кампании → контроль", next: "Тендер на запуск" },
-      { id: "P2", title: "Репозиционирование / новая ЦА", depth: "Смысл + коммуникационная платформа + кампания", next: "Тендер на репозиционирование" },
-      { id: "P3", title: "Новый регион / сегмент", depth: "Market entry architecture", next: "Тендер market entry" },
-      { id: "P4", title: "Крупный сезонный / event-запуск", depth: "Campaign architecture", next: "Бюджет кампании" },
-      { id: "P5", title: "Нужен один ответственный за маркетинг", depth: "AOR / генподряд", next: "Модель 1 или 3" },
-      { id: "P6", title: "Есть бюджет — нет системы ROMI", depth: "Budget governance + архитектура", next: "Конверт + контроль" },
+      { id: "P1", title: "Новая линейка / продукт", depth: "Первая волна спроса под одну цель", next: "Большой конверт на вывод" },
+      { id: "P2", title: "Реклама есть — результата нет", depth: "Перезапуск одного контура под ROMI", next: "Расширение конверта / retainer" },
+      { id: "P3", title: "Нужен один ответственный", depth: "60–90 дней «как генподряд» на узком scope", next: "Большой конверт или AOR" },
+      { id: "P4", title: "Сезон / акция / event", depth: "Одна кампания end-to-end", next: "Серия кампаний в конверте" },
+      { id: "P5", title: "Проверить Impro до большого бюджета", depth: "Любая одна цель + decision gate", next: "Решение по модели" },
     ];
 
     const TIER = {
-      S: { price: 180000, days: "2–3 нед", hours: "спринт S" },
-      M: { price: 350000, days: "3–5 нед", hours: "спринт M" },
-      L: { price: 650000, days: "5–8 нед", hours: "спринт L" },
+      S: { days: "30 дней", label: "Smoke" },
+      M: { days: "60 дней", label: "Standard" },
+      L: { days: "90 дней", label: "Serious" },
     };
 
     const MODELS = {
-      "1": "Тендер · общий маркетинг. бюджет",
+      "1": "Большой конверт",
       "2": "% + бюджет",
-      "3": "Подписка AOR + бюджет",
+      "3": "Partner Retainer",
     };
 
-    const OPTIONS = [
-      { id: "custdev", name: "CustDev 8–10 интервью", price: 90000 },
-      { id: "creative", name: "Креативная платформа (расширенная)", price: 120000 },
-      { id: "video", name: "Бриф + препродакшн ролика", price: 80000 },
-      { id: "board", name: "Защита перед советом директоров", price: 60000 },
-    ];
-
     const FIX = [
-      { code: "LOC-002", name: "Архитектура вывода (спринт)", group: "Локомотив", s: 180000, m: 350000, l: 650000 },
-      { code: "LOC-001", name: "Диагностика ROMI (младший вход)", group: "Локомотив", s: 49000, m: 89000, l: 149000 },
+      { code: "LOC-003", name: "Пилотный конверт (локомотив)", group: "Локомотив", s: 600000, m: 1500000, l: 5000000 },
+      { code: "RET-40", name: "Partner Retainer 40 ч/мес", group: "Retainer", s: 120000, m: 120000, l: 120000 },
+      { code: "RET-80", name: "Partner Retainer 80 ч/мес", group: "Retainer", s: 220000, m: 220000, l: 220000 },
+      { code: "RET-120", name: "Partner Retainer 120 ч/мес", group: "Retainer", s: 300000, m: 300000, l: 300000 },
+      { code: "LOC-001", name: "Диагностика ROMI (SMB)", group: "Локомотив", s: 49000, m: 89000, l: 149000 },
       { code: "FIX-P01", name: "Аудит Яндекс.Директ", group: "Performance", s: 25000, m: 40000, l: 65000 },
       { code: "FIX-P02", name: "Настройка Директ с нуля", group: "Performance", s: 45000, m: 70000, l: 110000 },
-      { code: "FIX-P03", name: "Аудит VK Ads", group: "Performance", s: 20000, m: 30000, l: 50000 },
-      { code: "FIX-P04", name: "Медиаплан (квартал light)", group: "Performance", s: 35000, m: 60000, l: 95000 },
       { code: "FIX-S01", name: "Технический SEO-аудит", group: "Поиск / AI / GEO", s: 35000, m: 55000, l: 85000 },
-      { code: "FIX-S02", name: "Полный SEO-аудит", group: "Поиск / AI / GEO", s: 70000, m: 100000, l: 150000 },
-      { code: "FIX-S03", name: "Семантика (сбор+кластеры)", group: "Поиск / AI / GEO", s: 25000, m: 50000, l: 90000 },
       { code: "FIX-S04", name: "SEO этап 1 (пакет договора)", group: "Поиск / AI / GEO", s: 75000, m: 75000, l: 75000 },
       { code: "FIX-S05", name: "AI SEO-аудит", group: "Поиск / AI / GEO", s: 50000, m: 80000, l: 120000 },
-      { code: "FIX-S06", name: "GEO-аудит", group: "Поиск / AI / GEO", s: 55000, m: 90000, l: 140000 },
-      { code: "FIX-A01", name: "Аудит веб-аналитики", group: "Аналитика / CRO", s: 25000, m: 45000, l: 70000 },
-      { code: "FIX-A02", name: "Метрика + цели под ключ", group: "Аналитика / CRO", s: 25000, m: 40000, l: 65000 },
       { code: "FIX-A03", name: "Сквозная light (сайт↔CRM)", group: "Аналитика / CRO", s: 60000, m: 100000, l: 160000 },
-      { code: "FIX-A04", name: "UX/CRO экспресс-аудит", group: "Аналитика / CRO", s: 35000, m: 55000, l: 85000 },
       { code: "FIX-W01", name: "Лендинг под рекламу", group: "Веб / MarTech", s: 90000, m: 180000, l: 320000 },
       { code: "FIX-W02", name: "Внедрение CRM базовое", group: "Веб / MarTech", s: 80000, m: 150000, l: 280000 },
-      { code: "FIX-W03", name: "Интеграция формы → CRM", group: "Веб / MarTech", s: 35000, m: 55000, l: 90000 },
-      { code: "FIX-W04", name: "Чат-бот Telegram light", group: "Веб / MarTech", s: 45000, m: 80000, l: 140000 },
       { code: "FIX-C01", name: "Маркетинг-аудит каналов", group: "Стратегия", s: 70000, m: 120000, l: 200000 },
-      { code: "FIX-C02", name: "Диагностика воронки продаж", group: "Стратегия", s: 60000, m: 100000, l: 160000 },
-      { code: "FIX-C03", name: "Юнит-экономика CAC/LTV", group: "Стратегия", s: 50000, m: 90000, l: 140000 },
       { code: "FIX-C04", name: "Позиционирование light", group: "Стратегия", s: 90000, m: 160000, l: 280000 },
-      { code: "FIX-R01", name: "SERM-аудит", group: "Репутация / ИИ", s: 35000, m: 50000, l: 80000 },
-      { code: "FIX-I01", name: "AI-аудит процессов", group: "Репутация / ИИ", s: 55000, m: 90000, l: 140000 },
     ];
 
     const money = n => new Intl.NumberFormat("ru-RU").format(Math.round(n)) + " ₽";
@@ -499,67 +481,49 @@
       });
     }
 
-    function renderOptions() {
-      document.getElementById("locoOptions").innerHTML = OPTIONS.map(o => `
-        <label class="row"><input type="checkbox" data-opt="${o.id}" /> <span><b>${o.name}</b><br/><small style="color:var(--muted)">${money(o.price)}</small></span></label>
-      `).join("");
-      document.querySelectorAll("#locoOptions input").forEach(i => i.addEventListener("change", calcLoco));
-    }
-
     function calcLoco() {
       const tier = document.getElementById("tier").value;
       const niche = parseFloat(document.getElementById("niche").value);
       const model = document.getElementById("model").value;
-      const envelope = parseFloat(document.getElementById("envelope").value);
+      let envelope = parseFloat(document.getElementById("envelope").value) * niche;
       const feePct = parseFloat(document.getElementById("fee").value);
       const credit = parseFloat(document.getElementById("credit").value);
       const trig = TRIGGERS.find(t => t.id === selectedTrigger);
 
-      let sprint = TIER[tier].price * niche;
-      let optSum = 0;
-      document.querySelectorAll("#locoOptions input:checked").forEach(i => {
-        const o = OPTIONS.find(x => x.id === i.dataset.opt);
-        if (o) optSum += o.price;
-      });
-      sprint += optSum;
+      const improShare = envelope * feePct;
+      const mediaProd = envelope - improShare;
+      const creditAmt = improShare * credit;
 
-      const agencyFee = envelope * feePct;
-      const creditAmt = sprint * credit;
-      const feeNet = Math.max(agencyFee - creditAmt, 0);
-      const mediaProd = envelope - agencyFee;
-
-      document.getElementById("locoPrice").innerHTML = `${money(sprint)}<small>спринт LOC-002 · затем конверт ${money(envelope)}</small>`;
-      document.getElementById("outTier").textContent = tier;
+      document.getElementById("locoPrice").innerHTML = `${money(envelope)}<small>один конверт · Impro само решает состав · ${TIER[tier].days}</small>`;
+      document.getElementById("outTier").textContent = TIER[tier].label;
       document.getElementById("outDays").textContent = TIER[tier].days;
       document.getElementById("outTrig").textContent = selectedTrigger;
       document.getElementById("outNext").textContent = MODELS[model];
 
       document.getElementById("locoComposition").innerHTML = [
-        { name: "Маркетинговый бюджет (конверт)", id: money(envelope) },
-        { name: `Agency fee ${Math.round(feePct*100)}%`, id: money(agencyFee) },
-        { name: "Зачёт спринта", id: "−" + money(creditAmt) },
-        { name: "Agency fee к оплате (после зачёта)", id: money(feeNet) },
-        { name: "Media / production / прочее в конверте", id: money(mediaProd) },
-        { name: "Смысл + позиционирование + архитектура кампаний", id: "в спринте" },
+        { name: "Пилотный конверт (клиент платит)", id: money(envelope) },
+        { name: `Работа Impro (~${Math.round(feePct*100)}%)`, id: money(improShare) },
+        { name: "Media / production / прочее", id: money(mediaProd) },
+        { name: "Зачёт работы Impro при расширении", id: money(creditAmt) },
+        { name: "Состав работ", id: "решает Impro под цель" },
         { name: "Next", id: trig.next },
       ].map(a => `<li>${a.name}<span>${a.id}</span></li>`).join("");
 
       document.getElementById("modelNote").textContent =
         model === "1"
-          ? "Модель 1: клиент утверждает один конверт — Impro генподрядчик (стратегия, креатив, медиа, контроль)."
-          : model === "2"
-          ? "Модель 2: % от бюджета/результата + отдельные статьи. Юридически KPI = целевые, не гарантия."
-          : "Модель 3: ежемесячный retainer за партнёрство + бюджеты кампаний отдельно.";
+          ? "После пилота — большой конверт: тот же принцип «бюджет + результат», больше горизонт."
+          : model === "3"
+          ? "После пилота можно остаться на Partner Retainer (часы/задачи) — ваша текущая рабочая модель."
+          : "После пилота — % от бюджета/результата + отдельные статьи.";
 
       window.__locoKP = [
-        `Impro · Архитектура вывода (${tier})`,
-        `Проект: ${trig.id} — ${trig.title}`,
-        `Спринт: ${money(sprint)} · ${TIER[tier].days}`,
-        `Модель: ${MODELS[model]}`,
-        `Конверт бюджета: ${money(envelope)}`,
-        `Agency fee ${Math.round(feePct*100)}%: ${money(agencyFee)} (зачёт спринта ${money(creditAmt)})`,
-        `К оплате agency после зачёта: ${money(feeNet)}`,
-        `Далее: ${trig.next}`,
+        `Impro · Пилотный конверт (${TIER[tier].label})`,
+        `Цель: ${trig.id} — ${trig.title}`,
+        `Срок: ${TIER[tier].days}`,
+        `Конверт: ${money(envelope)} (работа Impro ~${money(improShare)}, media/prod ~${money(mediaProd)})`,
+        `Принцип: Impro само определяет состав работ под результат`,
+        `Зачёт работы Impro дальше: ${money(creditAmt)}`,
+        `Целевая модель после пилота: ${MODELS[model]}`,
       ].join("\n");
     }
 
@@ -676,7 +640,6 @@
     });
 
     renderTriggers();
-    renderOptions();
     calcLoco();
     renderFix();
     loadAtoms().catch(err => {
