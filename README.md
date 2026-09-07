@@ -4,25 +4,35 @@
 
 **308 микроуслуг** (273 базовых + 35 новых: AI SEO, GEO, PR, Telegram Ads, Авито, внедрение ИИ).
 
+## Архитектура агентства (зафиксировано)
+
+Два направления предложений:
+
+| | A — Стратегическое партнёрство | B — Кусочки |
+|---|---|---|
+| Суть | Коммерциализация: маркетинг + продажи + IT | Ограниченный scope |
+| Цель сделки | % / партнёрская модель / годовой бюджет | Фикс (позже гибрид) |
+| Вход | Пилот функции, триггеры | SEO, Директ, сайт… |
+
+Полная фиксация: [docs/agency-offer-architecture.md](docs/agency-offer-architecture.md)
+
 ## Порядок работы (v2)
 
-1. **Локомотив** — входное предложение с адаптацией по триггерам  
-2. **Фиксированные услуги** — сборка из атомов, прайс-матрицы, калькулятор  
-3. **Гибридные** — фикс-база + переменная часть  
-4. **% от результата** — после гибрида  
-5. **Комплексы и Bitrix** — после утверждения первых услуг  
+1. Сборка направления A (партнёрство, пилот, контуры)  
+2. Сборка направления B (фикс-пакеты, атомы, калькулятор)  
+3. Мост B→A  
+4. Bitrix под оба типа сделок  
 
-| Сейчас | Файл |
+| Документ | Файл |
 |---|---|
-| **Логика локомотива** (холодка, вакансия, ICP) | [offers/locomotive-logic-cold.md](offers/locomotive-logic-cold.md) |
-| **Локомотив** «Пилотный конверт» | [offers/locomotive-pilot-envelope.md](offers/locomotive-pilot-envelope.md) |
-| Коммерческие модели (идеал / retainer часов / %) | [docs/commercial-models.md](docs/commercial-models.md) |
-| Архитектура вывода (не первый контакт) | [offers/locomotive-gtm-partnership.md](offers/locomotive-gtm-partnership.md) |
-| Младший вход «Диагностика ROMI» | [offers/locomotive-romi-diagnostic.md](offers/locomotive-romi-diagnostic.md) |
+| Архитектура A / B | [docs/agency-offer-architecture.md](docs/agency-offer-architecture.md) |
+| Логика локомотива (холодка) | [offers/locomotive-logic-cold.md](offers/locomotive-logic-cold.md) |
+| Пилотный конверт | [offers/locomotive-pilot-envelope.md](offers/locomotive-pilot-envelope.md) |
+| Коммерческие модели | [docs/commercial-models.md](docs/commercial-models.md) |
 | Фикс-пакеты волны 1 | [catalog/06-fixed-services-wave1.md](catalog/06-fixed-services-wave1.md) |
-| Калькулятор (HTML) | [calculator/index.html](calculator/index.html) |
+| Калькулятор | [calculator/index.html](calculator/index.html) |
 | Карточка компании | [docs/company-profile.md](docs/company-profile.md) |
-| План и роли | [docs/work-plan-v2.md](docs/work-plan-v2.md) |
+| План работ | [docs/work-plan-v2.md](docs/work-plan-v2.md) |
 
 ## Быстрый старт
 
