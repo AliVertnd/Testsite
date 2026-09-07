@@ -1,0 +1,42 @@
+{
+  "currency": "RUB",
+  "note": "Рабочие ориентиры Impro, не оферта. Медиа/лицензии отдельно.",
+  "functions": [
+    {"code": "FN-MKT-LEAD", "name": "Лид маркетинга", "block": "Маркетинг", "hours": {"S": 12, "M": 20, "L": 32}, "price": {"S": 45000, "M": 75000, "L": 120000}},
+    {"code": "FN-MKT-PERF", "name": "Performance", "block": "Маркетинг", "hours": {"S": 25, "M": 40, "L": 60}, "price": {"S": 70000, "M": 110000, "L": 170000}, "media_extra": true},
+    {"code": "FN-MKT-SEO", "name": "SEO", "block": "Маркетинг", "hours": {"S": 20, "M": 35, "L": 50}, "price": {"S": 55000, "M": 90000, "L": 140000}},
+    {"code": "FN-MKT-CONTENT", "name": "Контент / SMM", "block": "Маркетинг", "hours": {"S": 25, "M": 40, "L": 60}, "price": {"S": 65000, "M": 100000, "L": 160000}},
+    {"code": "FN-MKT-ANALYTICS", "name": "Аналитика и ROMI", "block": "Маркетинг", "hours": {"S": 12, "M": 20, "L": 32}, "price": {"S": 40000, "M": 70000, "L": 110000}},
+    {"code": "FN-MKT-BRAND", "name": "Смысл / бренд light", "block": "Маркетинг", "hours": {"S": 8, "M": 14, "L": 22}, "price": {"S": 35000, "M": 60000, "L": 95000}},
+    {"code": "FN-MKT-SERM", "name": "Репутация", "block": "Маркетинг", "hours": {"S": 12, "M": 20, "L": 30}, "price": {"S": 35000, "M": 55000, "L": 85000}},
+    {"code": "FN-SALES-FUNNEL", "name": "Воронка продаж", "block": "Продажи", "hours": {"S": 12, "M": 20, "L": 30}, "price": {"S": 50000, "M": 85000, "L": 130000}},
+    {"code": "FN-SALES-CRM", "name": "CRM-процессы", "block": "Продажи", "hours": {"S": 10, "M": 18, "L": 28}, "price": {"S": 40000, "M": 70000, "L": 110000}},
+    {"code": "FN-IT-WEB", "name": "Сайт / развитие", "block": "IT", "hours": {"S": 20, "M": 35, "L": 55}, "price": {"S": 60000, "M": 110000, "L": 180000}},
+    {"code": "FN-IT-SUPPORT", "name": "Техподдержка", "block": "IT", "hours": {"S": 8, "M": 12, "L": 20}, "price": {"S": 25000, "M": 40000, "L": 70000}},
+    {"code": "FN-IT-INTEGRATIONS", "name": "Интеграции", "block": "IT", "hours": {"S": 8, "M": 14, "L": 24}, "price": {"S": 35000, "M": 60000, "L": 100000}},
+    {"code": "FN-AUTO-OPS", "name": "Автоматизация", "block": "Автоматизация", "hours": {"S": 12, "M": 20, "L": 32}, "price": {"S": 45000, "M": 75000, "L": 120000}},
+    {"code": "FN-AUTO-AI", "name": "ИИ-контур", "block": "Автоматизация", "hours": {"S": 10, "M": 16, "L": 28}, "price": {"S": 40000, "M": 70000, "L": 120000}}
+  ],
+  "complexes": [
+    {"code": "OX-MKT-START", "name": "Маркетинг на аутсорсе · Start", "format": 2, "price": 180000, "functions": [["FN-MKT-LEAD", "S"], ["FN-MKT-PERF", "S"], ["FN-MKT-ANALYTICS", "S"]]},
+    {"code": "OX-MKT-GROWTH", "name": "Маркетинг на аутсорсе · Growth", "format": 2, "price": 350000, "functions": [["FN-MKT-LEAD", "M"], ["FN-MKT-PERF", "M"], ["FN-MKT-SEO", "S"], ["FN-MKT-ANALYTICS", "M"], ["FN-MKT-CONTENT", "S"]]},
+    {"code": "OX-MKT-SCALE", "name": "Маркетинг на аутсорсе · Scale", "format": 2, "price": 650000, "functions": [["FN-MKT-LEAD", "L"], ["FN-MKT-PERF", "L"], ["FN-MKT-SEO", "M"], ["FN-MKT-CONTENT", "M"], ["FN-MKT-ANALYTICS", "L"], ["FN-MKT-BRAND", "S"]]},
+    {"code": "OX-IT-START", "name": "IT на аутсорсе · Start", "format": 2, "price": 90000, "functions": [["FN-IT-WEB", "S"], ["FN-IT-SUPPORT", "S"]]},
+    {"code": "OX-IT-GROWTH", "name": "IT на аутсорсе · Growth", "format": 2, "price": 200000, "functions": [["FN-IT-WEB", "M"], ["FN-IT-SUPPORT", "M"], ["FN-IT-INTEGRATIONS", "S"]]},
+    {"code": "OX-IT-SCALE", "name": "IT на аутсорсе · Scale", "format": 2, "price": 380000, "functions": [["FN-IT-WEB", "L"], ["FN-IT-SUPPORT", "L"], ["FN-IT-INTEGRATIONS", "M"], ["FN-AUTO-OPS", "S"]]},
+    {"code": "OX-AUTO-START", "name": "Автоматизация на аутсорсе · Start", "format": 2, "price": 90000, "functions": [["FN-AUTO-OPS", "S"], ["FN-SALES-CRM", "S"]]},
+    {"code": "OX-AUTO-GROWTH", "name": "Автоматизация на аутсорсе · Growth", "format": 2, "price": 220000, "functions": [["FN-AUTO-OPS", "M"], ["FN-SALES-CRM", "M"], ["FN-MKT-ANALYTICS", "S"], ["FN-AUTO-AI", "S"]]},
+    {"code": "OX-AUTO-SCALE", "name": "Автоматизация на аутсорсе · Scale", "format": 2, "price": 400000, "functions": [["FN-AUTO-OPS", "L"], ["FN-SALES-CRM", "L"], ["FN-AUTO-AI", "M"], ["FN-IT-INTEGRATIONS", "M"]]},
+    {"code": "OX-COM-CORE", "name": "Коммерциализация на аутсорсе · Core", "format": 2, "price": 280000, "functions": [["FN-MKT-LEAD", "S"], ["FN-MKT-PERF", "S"], ["FN-MKT-ANALYTICS", "S"], ["FN-SALES-FUNNEL", "S"], ["FN-SALES-CRM", "S"]]},
+    {"code": "OX-COM-FULL", "name": "Коммерциализация на аутсорсе · Full", "format": 2, "price": 550000, "functions": [["FN-MKT-LEAD", "M"], ["FN-MKT-PERF", "M"], ["FN-MKT-SEO", "S"], ["FN-MKT-ANALYTICS", "M"], ["FN-MKT-CONTENT", "S"], ["FN-SALES-FUNNEL", "M"], ["FN-SALES-CRM", "M"], ["FN-IT-WEB", "S"], ["FN-IT-SUPPORT", "S"]]},
+    {"code": "OX-COM-MAX", "name": "Коммерциализация на аутсорсе · Max", "format": 2, "price": 1000000, "functions": [["FN-MKT-LEAD", "L"], ["FN-MKT-PERF", "L"], ["FN-MKT-SEO", "M"], ["FN-MKT-CONTENT", "M"], ["FN-MKT-ANALYTICS", "L"], ["FN-MKT-BRAND", "S"], ["FN-SALES-FUNNEL", "L"], ["FN-SALES-CRM", "L"], ["FN-IT-WEB", "M"], ["FN-IT-SUPPORT", "M"], ["FN-IT-INTEGRATIONS", "S"], ["FN-AUTO-OPS", "S"]]}
+  ],
+  "format1": {
+    "impro_share_default": 0.35,
+    "pilots": [
+      {"code": "PILOT-SMOKE", "name": "Пилот Smoke 30д", "envelope_min": 600000, "envelope_default": 800000, "impro_share": 0.35},
+      {"code": "PILOT-STD", "name": "Пилот Standard 60д", "envelope_min": 1500000, "envelope_default": 2000000, "impro_share": 0.35},
+      {"code": "PILOT-SERIOUS", "name": "Пилот Serious 90д", "envelope_min": 3000000, "envelope_default": 5000000, "impro_share": 0.32}
+    ]
+  }
+}

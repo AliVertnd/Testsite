@@ -252,18 +252,68 @@
 <body>
   <header>
     <div class="brand">Impro <span>Calculator</span></div>
-    <p class="sub">Локомотив — пилотный конверт (мини «бюджет + результат»). Рядом: Partner Retainer (часы), фикс-пакеты, атомы. Цены — ориентиры.</p>
+    <p class="sub">Два формата: бюджет/% на действие и подписка (аутсорс из функций). Локомотив холодки = пилотный конверт. Цены — ориентиры.</p>
   </header>
 
   <nav class="tabs">
-    <button type="button" class="active" data-tab="loco">Пилотный конверт</button>
+    <button type="button" class="active" data-tab="fn">Функции / аутсорс</button>
+    <button type="button" data-tab="loco">Пилотный конверт</button>
     <button type="button" data-tab="fix">Фикс и retainer</button>
-    <button type="button" data-tab="atoms">Атомы (279)</button>
+    <button type="button" data-tab="atoms">Атомы</button>
   </nav>
 
   <main>
+    <!-- FUNCTIONS -->
+    <section id="tab-fn" class="panel">
+      <h2>Формат продажи</h2>
+      <div class="grid2">
+        <div>
+          <label>Формат</label>
+          <select id="fnFormat">
+            <option value="2" selected>2 — Подписка / аутсорс</option>
+            <option value="1">1 — Бюджет / % на действие</option>
+          </select>
+        </div>
+        <div>
+          <label>Шаблон комплекса</label>
+          <select id="fnComplex"><option value="">Собрать вручную из FN</option></select>
+        </div>
+      </div>
+      <div class="grid2" id="fnFormat1Wrap" style="display:none">
+        <div>
+          <label>Конверт действия, ₽</label>
+          <input type="number" id="fnEnvelope" value="2000000" step="100000" />
+        </div>
+        <div>
+          <label>Доля работы Impro</label>
+          <select id="fnShare">
+            <option value="0.25">25%</option>
+            <option value="0.35" selected>35%</option>
+            <option value="0.40">40%</option>
+          </select>
+        </div>
+      </div>
+      <h2 style="margin-top:16px">Функции (ответственность)</h2>
+      <div class="fix-services" id="fnList"></div>
+    </section>
+
+    <aside id="tab-fn-aside" class="panel">
+      <h2>Итог для клиента</h2>
+      <div class="price" id="fnPrice">0 ₽<small>зона ответственности</small></div>
+      <div class="meta">
+        <div><div class="k">Формат</div><div class="v" id="fnOutFormat">Подписка</div></div>
+        <div><div class="k">FN</div><div class="v" id="fnOutCount">0</div></div>
+        <div><div class="k">Часы≈</div><div class="v" id="fnOutHours">0</div></div>
+        <div><div class="k">Медиа</div><div class="v" id="fnOutMedia">отдельно</div></div>
+      </div>
+      <h2>Состав ответственности</h2>
+      <ul class="list" id="fnCart"></ul>
+      <p class="note">Фраза КП: «За эту сумму наша ответственность — перечисленные функции. Медиа и лицензии отдельно.»</p>
+      <button type="button" id="copyFn" style="margin-top:14px;width:100%;padding:12px;border-radius:8px;border:0;background:var(--accent);color:#0b1210;font-family:var(--font-d);font-weight:700;cursor:pointer">Скопировать КП-блок</button>
+    </aside>
+
     <!-- LOCOMOTIVE -->
-    <section id="tab-loco" class="panel">
+    <section id="tab-loco" class="panel hidden">
       <h2>1. Цель пилота</h2>
       <div class="triggers" id="triggers"></div>
 
@@ -328,7 +378,7 @@
       <p class="note" id="modelNote"></p>
     </section>
 
-    <aside id="tab-loco-aside" class="panel">
+    <aside id="tab-loco-aside" class="panel hidden">
       <h2>Итог LOC-003</h2>
       <div class="price" id="locoPrice">1 500 000 ₽<small>пилотный конверт под результат</small></div>
       <div class="meta">
