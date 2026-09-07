@@ -252,97 +252,94 @@
 <body>
   <header>
     <div class="brand">Impro <span>Calculator</span></div>
-    <p class="sub">Локомотив — стратегическое партнёрство «Архитектура вывода» (тендер на маркетинг). Младший вход и фикс-пакеты — отдельно. Цены — ориентиры, не оферта.</p>
+    <p class="sub">Локомотив — пилотный конверт (мини «бюджет + результат»). Рядом: Partner Retainer (часы), фикс-пакеты, атомы. Цены — ориентиры.</p>
   </header>
 
   <nav class="tabs">
-    <button type="button" class="active" data-tab="loco">Партнёрство / тендер</button>
-    <button type="button" data-tab="fix">Фикс-пакеты</button>
+    <button type="button" class="active" data-tab="loco">Пилотный конверт</button>
+    <button type="button" data-tab="fix">Фикс и retainer</button>
     <button type="button" data-tab="atoms">Атомы (279)</button>
   </nav>
 
   <main>
     <!-- LOCOMOTIVE -->
     <section id="tab-loco" class="panel">
-      <h2>1. Класс проекта (триггер ЛПР)</h2>
+      <h2>1. Цель пилота</h2>
       <div class="triggers" id="triggers"></div>
 
       <div class="grid2" style="margin-top:16px">
         <div>
-          <label>Спринт «Архитектура вывода»</label>
+          <label>Ступень пилота</label>
           <select id="tier">
-            <option value="S">S — 180к · 2–3 нед</option>
-            <option value="M" selected>M — 350к · 3–5 нед</option>
-            <option value="L">L — 650к · 5–8 нед</option>
+            <option value="S">Smoke · 30 дней</option>
+            <option value="M" selected>Standard · 60 дней</option>
+            <option value="L">Serious · 90 дней</option>
           </select>
         </div>
         <div>
-          <label>Модель партнёрства после спринта</label>
-          <select id="model">
-            <option value="1" selected>1 — Общий маркетинг. бюджет (тендер) ★</option>
-            <option value="2">2 — % + бюджет</option>
-            <option value="3">3 — Фикс-подписка + бюджет</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="grid2">
-        <div>
-          <label>Ориентир бюджета тендера (₽)</label>
+          <label>Пилотный конверт (всё включено), ₽</label>
           <select id="envelope">
+            <option value="600000">600 тыс</option>
+            <option value="1500000" selected>1.5 млн</option>
+            <option value="3000000">3 млн</option>
             <option value="5000000">5 млн</option>
-            <option value="12000000" selected>12 млн</option>
-            <option value="25000000">25 млн</option>
-            <option value="50000000">50 млн</option>
-            <option value="100000000">100 млн</option>
-          </select>
-        </div>
-        <div>
-          <label>Agency fee (% от конверта)</label>
-          <select id="fee">
-            <option value="0.12">12%</option>
-            <option value="0.15" selected>15%</option>
-            <option value="0.18">18%</option>
+            <option value="8000000">8 млн</option>
           </select>
         </div>
       </div>
 
       <div class="grid2">
         <div>
-          <label>Зачёт спринта в agency fee</label>
-          <select id="credit">
-            <option value="0">Без зачёта</option>
-            <option value="0.5" selected>50% стоимости спринта</option>
-            <option value="1">100% стоимости спринта</option>
+          <label>Доля работы Impro в конверте</label>
+          <select id="fee">
+            <option value="0.25">25%</option>
+            <option value="0.35" selected>35%</option>
+            <option value="0.45">45%</option>
           </select>
         </div>
         <div>
-          <label>Ниша</label>
+          <label>После пилота — целевая модель</label>
+          <select id="model">
+            <option value="1" selected>Большой конверт (бюджет + результат)</option>
+            <option value="3">Partner Retainer (часы)</option>
+            <option value="2">% + бюджет</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <label>Зачёт работы Impro в следующий конверт</label>
+          <select id="credit">
+            <option value="1" selected>100%</option>
+            <option value="0.5">50%</option>
+            <option value="0">Без зачёта</option>
+          </select>
+        </div>
+        <div>
+          <label>Сложность ниши</label>
           <select id="niche">
             <option value="1">Стандарт</option>
-            <option value="1.15">Конкурентная</option>
-            <option value="1.3">Сложная / регулируемая</option>
+            <option value="1.15">Выше среднего</option>
+            <option value="1.3">Сложная</option>
           </select>
         </div>
       </div>
-
-      <h2 style="margin-top:20px">2. Опции спринта</h2>
-      <div class="fix-services" id="locoOptions"></div>
       <p class="note" id="modelNote"></p>
     </section>
 
     <aside id="tab-loco-aside" class="panel">
-      <h2>Итог LOC-002</h2>
-      <div class="price" id="locoPrice">350 000 ₽<small>спринт «Архитектура вывода»</small></div>
+      <h2>Итог LOC-003</h2>
+      <div class="price" id="locoPrice">1 500 000 ₽<small>пилотный конверт под результат</small></div>
       <div class="meta">
-        <div><div class="k">Спринт</div><div class="v" id="outTier">M</div></div>
-        <div><div class="k">Срок</div><div class="v" id="outDays">3–5 нед</div></div>
-        <div><div class="k">Проект</div><div class="v" id="outTrig">P1</div></div>
-        <div><div class="k">Модель</div><div class="v" id="outNext" style="font-size:13px;font-weight:600">Тендер</div></div>
+        <div><div class="k">Ступень</div><div class="v" id="outTier">M</div></div>
+        <div><div class="k">Срок</div><div class="v" id="outDays">60 дней</div></div>
+        <div><div class="k">Цель</div><div class="v" id="outTrig">P1</div></div>
+        <div><div class="k">Дальше</div><div class="v" id="outNext" style="font-size:13px;font-weight:600">Большой конверт</div></div>
       </div>
-      <h2>Конверт партнёрства</h2>
+      <h2>Разложение конверта</h2>
       <ul class="list" id="locoComposition"></ul>
-      <p class="note">Спринт продаёт Impro как генподрядчика маркетинга. Дальше — общий бюджет (модель 1), не «пакет SEO». Диагностика ROMI — младший вход для SMB.</p>
+      <p class="note">Клиент платит один конверт. Impro само решает, что делать для цели. Это мини-версия идеала — не продажа плана.</p>
       <button type="button" id="copyLoco" style="margin-top:14px;width:100%;padding:12px;border-radius:8px;border:0;background:var(--accent);color:#0b1210;font-family:var(--font-d);font-weight:700;cursor:pointer">Скопировать КП-блок</button>
     </aside>
 
@@ -388,7 +385,7 @@
       <h2>Корзина фикс-пакетов</h2>
       <div class="price" id="fixTotal">0 ₽<small>сумма выбранных пакетов</small></div>
       <ul class="list" id="fixCart"></ul>
-      <p class="note">Пакеты можно предлагать после LOC-001 или отдельно, если триггер уже ясен и диагностика не нужна.</p>
+      <p class="note">Пакеты — для точечных задач и SMB. Стратегические проекты идут через LOC-002 → тендер.</p>
     </aside>
 
     <!-- ATOMS -->
@@ -679,7 +676,6 @@
     });
 
     renderTriggers();
-    fillExtra();
     renderOptions();
     calcLoco();
     renderFix();
