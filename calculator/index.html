@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Impro — калькулятор услуг</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --bg2: #171e26;
+      --panel: #1c2530;
+      --line: #2a3544;
+      --text: #e8eef5;
+      --muted: #8b9aab;
+      --accent: #3dd6c6;
+      --accent2: #f0a05a;
+      --danger: #e86a6a;
+      --ok: #6bcf7f;
+      --radius: 12px;
+      --font-d: "Manrope", sans-serif;
+      --font-b: "IBM Plex Sans", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-b);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #1a3a3a 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #3a2a18 0%, transparent 50%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      padding: 28px 24px 12px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .brand {
+      font-family: var(--font-d);
+      font-weight: 800;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+    .brand span { color: var(--accent); }
+    .sub {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 14px;
+      max-width: 640px;
+      line-height: 1.45;
+    }
+    nav.tabs {
+      display: flex;
+      gap: 8px;
+      max-width: 1200px;
+      margin: 16px auto 0;
+      padding: 0 24px;
+      flex-wrap: wrap;
+    }
+    nav.tabs button {
+      font-family: var(--font-d);
+      font-weight: 600;
+      border: 1px solid var(--line);
+      background: var(--bg2);
+      color: var(--muted);
+      padding: 10px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    nav.tabs button.active {
+      background: var(--accent);
+      color: #0b1210;
+      border-color: var(--accent);
+    }
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px 60px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 920px) {
+      main { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: color-mix(in srgb, var(--panel) 92%, transparent);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    h2 {
+      font-family: var(--font-d);
+      font-size: 18px;
+      margin: 0 0 14px;
+      letter-spacing: -0.02em;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 12px 0 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    select, input[type="search"], input[type="number"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .triggers {
+      display: grid;
+      gap: 8px;
+    }
+    .trig {
+      border: 1px solid var(--line);
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text);
+      font: inherit;
+      transition: border-color .15s, background .15s;
+    }
+    .trig:hover { border-color: #3d4f63; }
+    .trig.active {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 12%, var(--bg));
+    }
+    .trig b {
+      font-family: var(--font-d);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .trig small { color: var(--muted); line-height: 1.35; display: block; }
+    .price {
+      font-family: var(--font-d);
+      font-weight: 800;
+      font-size: 42px;
+      letter-spacing: -0.04em;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .price small {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-top: 8px;
+      letter-spacing: 0;
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .meta div {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+    }
+    .meta .k { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+    .meta .v { font-family: var(--font-d); font-weight: 700; margin-top: 4px; }
+    ul.list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    ul.list li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    ul.list li span { color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .chip {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent2) 20%, transparent);
+      color: var(--accent2);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .chip.ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+    .hidden { display: none !important; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 6px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; }
+    .money { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .risk { color: var(--danger); font-size: 11px; }
+    .catalog-wrap { grid-column: 1 / -1; }
+    .filters { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 700px) {
+      .filters, .grid2, .meta { grid-template-columns: 1fr; }
+    }
+    .note {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .fix-services {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .fix-services label.row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+    }
+    .fix-services label.row input { margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">Impro <span>Calculator</span></div>
+    <p class="sub">Локомотив «Диагностика ROMI» + каталог фиксированных услуг. Цены — рабочие ориентиры для согласования, не оферта.</p>
+  </header>
+
+  <nav class="tabs">
+    <button type="button" class="active" data-tab="loco">Локомотив</button>
+    <button type="button" data-tab="fix">Фикс-пакеты волны 1</button>
+    <button type="button" data-tab="atoms">Каталог атомов (279)</button>
+  </nav>
+
+  <main>
+    <!-- LOCOMOTIVE -->
+    <section id="tab-loco" class="panel">
+      <h2>1. Триггер клиента</h2>
+      <div class="triggers" id="triggers"></div>
+
+      <div class="grid2" style="margin-top:16px">
+        <div>
+          <label>Размер / сложность</label>
+          <select id="tier">
+            <option value="S">S — Express</option>
+            <option value="M" selected>M — Standard</option>
+            <option value="L">L — Deep</option>
+          </select>
+        </div>
+        <div>
+          <label>Нишевой коэффициент</label>
+          <select id="niche">
+            <option value="1">1.0 — стандарт</option>
+            <option value="1.15">1.15 — конкурентная ниша</option>
+            <option value="1.3">1.3 — медицина / финансы</option>
+            <option value="1.5">1.5 — сложный B2B / регулируемые</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <label>Срочность</label>
+          <select id="rush">
+            <option value="1">Обычный срок</option>
+            <option value="1.2">Rush +20%</option>
+          </select>
+        </div>
+        <div>
+          <label>Доп. углубление</label>
+          <select id="extraTrigger">
+            <option value="">Нет</option>
+          </select>
+        </div>
+      </div>
+
+      <h2 style="margin-top:20px">2. Опции</h2>
+      <div class="fix-services" id="locoOptions"></div>
+    </section>
+
+    <aside id="tab-loco-aside" class="panel">
+      <h2>Итог LOC-001</h2>
+      <div class="price" id="locoPrice">89 000 ₽<small>фиксированная стоимость диагностики</small></div>
+      <div class="meta">
+        <div><div class="k">Tier</div><div class="v" id="outTier">M</div></div>
+        <div><div class="k">Срок</div><div class="v" id="outDays">10–15 р.д.</div></div>
+        <div><div class="k">Триггер</div><div class="v" id="outTrig">T1</div></div>
+        <div><div class="k">Next-sell</div><div class="v" id="outNext" style="font-size:13px;font-weight:600">Директ, лендинг</div></div>
+      </div>
+      <h2>Состав</h2>
+      <ul class="list" id="locoComposition"></ul>
+      <p class="note">В отчёте — оценка всех 6 блоков Impro (Performance, Контент, Стратегия, Веб/MarTech, Брендинг, ИИ), даже если углубление одно. Так клиент видит ширину агентства.</p>
+      <button type="button" id="copyLoco" style="margin-top:14px;width:100%;padding:12px;border-radius:8px;border:0;background:var(--accent);color:#0b1210;font-family:var(--font-d);font-weight:700;cursor:pointer">Скопировать КП-блок</button>
+    </aside>
+
+    <!-- FIX PACKAGES -->
+    <section id="tab-fix" class="panel hidden catalog-wrap">
+      <h2>Фикс-пакеты волны 1</h2>
+      <div class="filters">
+        <input type="search" id="fixSearch" placeholder="Поиск пакета…" />
+        <select id="fixGroup">
+          <option value="">Все группы</option>
+          <option>Performance</option>
+          <option>Поиск / AI / GEO</option>
+          <option>Аналитика / CRO</option>
+          <option>Веб / MarTech</option>
+          <option>Стратегия</option>
+          <option>Репутация / ИИ</option>
+        </select>
+        <select id="fixTier">
+          <option value="S">Цена S</option>
+          <option value="M" selected>Цена M</option>
+          <option value="L">Цена L</option>
+        </select>
+      </div>
+      <div style="overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Код</th>
+              <th>Услуга</th>
+              <th>Группа</th>
+              <th>S</th>
+              <th>M</th>
+              <th>L</th>
+              <th>Выбрано</th>
+            </tr>
+          </thead>
+          <tbody id="fixBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <aside id="tab-fix-aside" class="panel hidden">
+      <h2>Корзина фикс-пакетов</h2>
+      <div class="price" id="fixTotal">0 ₽<small>сумма выбранных пакетов</small></div>
+      <ul class="list" id="fixCart"></ul>
+      <p class="note">Пакеты можно предлагать после LOC-001 или отдельно, если триггер уже ясен и диагностика не нужна.</p>
+    </aside>
+
+    <!-- ATOMS -->
+    <section id="tab-atoms" class="panel hidden catalog-wrap">
+      <h2>Атомарный каталог (разовые + проектные)</h2>
+      <div class="filters">
+        <input type="search" id="atomSearch" placeholder="Поиск атома…" />
+        <select id="atomDir"><option value="">Все направления</option></select>
+        <select id="atomSort">
+          <option value="impro">Сортировка: Impro avg</option>
+          <option value="market">Сортировка: рынок avg</option>
+          <option value="name">Сортировка: имя</option>
+        </select>
+      </div>
+      <div style="overflow:auto; max-height:70vh">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Услуга</th>
+              <th>Направление</th>
+              <th>Часы</th>
+              <th>Рынок avg</th>
+              <th>Себест.</th>
+              <th>Impro avg</th>
+            </tr>
+          </thead>
+          <tbody id="atomBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const TRIGGERS = [
+      { id: "T1", title: "Реклама дорогая / мало лидов", depth: "PPC + посадочные + аналитика", next: "Директ / VK, лендинг, CRO", atoms: ["M-021", "M-033"] },
+      { id: "T2", title: "Сайт не конвертит", depth: "UX + CRO + SEO light", next: "Лендинг, SEO этап 1", atoms: ["IT-004", "M-033", "M-003"] },
+      { id: "T3", title: "Лиды есть — продажи слабые", depth: "Воронка + CRM", next: "CRM, регламенты продаж", atoms: ["C-006", "M-081"] },
+      { id: "T4", title: "Не видим цифры / ROMI", depth: "Сквозная + Метрика", next: "Сквозная, BI, коллтрекинг", atoms: ["M-052", "M-050"] },
+      { id: "T5", title: "Неясное позиционирование", depth: "Оффер + конкуренты", next: "Бренд-платформа, контент", atoms: ["M-094", "M-111"] },
+      { id: "T6", title: "Хотим ИИ / нейропоиск", depth: "AI SEO / GEO", next: "AI SEO, GEO, боты", atoms: ["N-001", "N-033"] },
+      { id: "T7", title: "Запуск продукта / рынка", depth: "GTM + юнит-экономика", next: "GTM, медиаплан, связка лендинг+реклама", atoms: ["M-109", "M-110"] },
+      { id: "T8", title: "Репутация мешает продажам", depth: "SERM + карточки", next: "SERM, PR", atoms: ["M-067", "M-012"] },
+    ];
+
+    const TIER = {
+      S: { price: 49000, days: "7–10 р.д.", hours: "28–36" },
+      M: { price: 89000, days: "10–15 р.д.", hours: "45–60" },
+      L: { price: 149000, days: "15–20 р.д.", hours: "75–100" },
+    };
+
+    const OPTIONS = [
+      { id: "custdev", name: "CustDev 5 интервью", price: 45000 },
+      { id: "mystery", name: "Mystery shopping light", price: 35000 },
+      { id: "aigeo", name: "AI SEO + GEO блок", price: 55000 },
+      { id: "session", name: "Расширенная стратег-сессия", price: 40000 },
+    ];
+
+    const FIX = [
+      { code: "LOC-001", name: "Диагностика ROMI", group: "Локомотив", s: 49000, m: 89000, l: 149000 },
+      { code: "FIX-P01", name: "Аудит Яндекс.Директ", group: "Performance", s: 25000, m: 40000, l: 65000 },
+      { code: "FIX-P02", name: "Настройка Директ с нуля", group: "Performance", s: 45000, m: 70000, l: 110000 },
+      { code: "FIX-P03", name: "Аудит VK Ads", group: "Performance", s: 20000, m: 30000, l: 50000 },
+      { code: "FIX-P04", name: "Медиаплан (квартал light)", group: "Performance", s: 35000, m: 60000, l: 95000 },
+      { code: "FIX-S01", name: "Технический SEO-аудит", group: "Поиск / AI / GEO", s: 35000, m: 55000, l: 85000 },
+      { code: "FIX-S02", name: "Полный SEO-аудит", group: "Поиск / AI / GEO", s: 70000, m: 100000, l: 150000 },
+      { code: "FIX-S03", name: "Семантика (сбор+кластеры)", group: "Поиск / AI / GEO", s: 25000, m: 50000, l: 90000 },
+      { code: "FIX-S04", name: "SEO этап 1 (пакет договора)", group: "Поиск / AI / GEO", s: 75000, m: 75000, l: 75000 },
+      { code: "FIX-S05", name: "AI SEO-аудит", group: "Поиск / AI / GEO", s: 50000, m: 80000, l: 120000 },
+      { code: "FIX-S06", name: "GEO-аудит", group: "Поиск / AI / GEO", s: 55000, m: 90000, l: 140000 },
+      { code: "FIX-A01", name: "Аудит веб-аналитики", group: "Аналитика / CRO", s: 25000, m: 45000, l: 70000 },
+      { code: "FIX-A02", name: "Метрика + цели под ключ", group: "Аналитика / CRO", s: 25000, m: 40000, l: 65000 },
+      { code: "FIX-A03", name: "Сквозная light (сайт↔CRM)", group: "Аналитика / CRO", s: 60000, m: 100000, l: 160000 },
+      { code: "FIX-A04", name: "UX/CRO экспресс-аудит", group: "Аналитика / CRO", s: 35000, m: 55000, l: 85000 },
+      { code: "FIX-W01", name: "Лендинг под рекламу", group: "Веб / MarTech", s: 90000, m: 180000, l: 320000 },
+      { code: "FIX-W02", name: "Внедрение CRM базовое", group: "Веб / MarTech", s: 80000, m: 150000, l: 280000 },
+      { code: "FIX-W03", name: "Интеграция формы → CRM", group: "Веб / MarTech", s: 35000, m: 55000, l: 90000 },
+      { code: "FIX-W04", name: "Чат-бот Telegram light", group: "Веб / MarTech", s: 45000, m: 80000, l: 140000 },
+      { code: "FIX-C01", name: "Маркетинг-аудит каналов", group: "Стратегия", s: 70000, m: 120000, l: 200000 },
+      { code: "FIX-C02", name: "Диагностика воронки продаж", group: "Стратегия", s: 60000, m: 100000, l: 160000 },
+      { code: "FIX-C03", name: "Юнит-экономика CAC/LTV", group: "Стратегия", s: 50000, m: 90000, l: 140000 },
+      { code: "FIX-C04", name: "Позиционирование light", group: "Стратегия", s: 90000, m: 160000, l: 280000 },
+      { code: "FIX-R01", name: "SERM-аудит", group: "Репутация / ИИ", s: 35000, m: 50000, l: 80000 },
+      { code: "FIX-I01", name: "AI-аудит процессов", group: "Репутация / ИИ", s: 55000, m: 90000, l: 140000 },
+    ];
+
+    const money = n => new Intl.NumberFormat("ru-RU").format(Math.round(n)) + " ₽";
+    let selectedTrigger = "T1";
+    let fixSelected = new Set();
+    let atoms = [];
+
+    function renderTriggers() {
+      const box = document.getElementById("triggers");
+      box.innerHTML = TRIGGERS.map(t => `
+        <button type="button" class="trig ${t.id === selectedTrigger ? "active" : ""}" data-id="${t.id}">
+          <b>${t.id}. ${t.title}</b>
+          <small>Углубление: ${t.depth}</small>
+        </button>
+      `).join("");
+      box.querySelectorAll(".trig").forEach(btn => {
+        btn.addEventListener("click", () => {
+          selectedTrigger = btn.dataset.id;
+          renderTriggers();
+          fillExtra();
+          calcLoco();
+        });
+      });
+    }
+
+    function fillExtra() {
+      const sel = document.getElementById("extraTrigger");
+      sel.innerHTML = `<option value="">Нет</option>` + TRIGGERS
+        .filter(t => t.id !== selectedTrigger)
+        .map(t => `<option value="${t.id}">${t.id} — ${t.title}</option>`).join("");
+    }
+
+    function renderOptions() {
+      document.getElementById("locoOptions").innerHTML = OPTIONS.map(o => `
+        <label class="row"><input type="checkbox" data-opt="${o.id}" /> <span><b>${o.name}</b><br/><small style="color:var(--muted)">${money(o.price)}</small></span></label>
+      `).join("");
+      document.querySelectorAll("#locoOptions input").forEach(i => i.addEventListener("change", calcLoco));
+    }
+
+    function calcLoco() {
+      const tier = document.getElementById("tier").value;
+      const niche = parseFloat(document.getElementById("niche").value);
+      const rush = parseFloat(document.getElementById("rush").value);
+      const extra = document.getElementById("extraTrigger").value;
+      const trig = TRIGGERS.find(t => t.id === selectedTrigger);
+      let price = TIER[tier].price * niche * rush;
+      if (extra) price += tier === "S" ? 15000 : tier === "M" ? 25000 : 35000;
+      let optSum = 0;
+      document.querySelectorAll("#locoOptions input:checked").forEach(i => {
+        const o = OPTIONS.find(x => x.id === i.dataset.opt);
+        if (o) optSum += o.price;
+      });
+      price += optSum;
+
+      document.getElementById("locoPrice").innerHTML = `${money(price)}<small>фикс · ${TIER[tier].hours} ч · ниша ×${niche}${rush > 1 ? " · rush" : ""}</small>`;
+      document.getElementById("outTier").textContent = tier;
+      document.getElementById("outDays").textContent = TIER[tier].days;
+      document.getElementById("outTrig").textContent = selectedTrigger + (extra ? " +" + extra : "");
+      document.getElementById("outNext").textContent = trig.next;
+
+      const base = [
+        { name: "Каркас: воронка лидогенерации end-to-end", id: "M-116" },
+        { name: "Аудит веб-аналитики", id: "M-048" },
+        { name: "Overview 6 блоков Impro", id: "M-108 light" },
+        { name: "Бизнес-контекст (экспресс)", id: "C-001 light" },
+      ];
+      const depth = trig.atoms.map(id => ({ name: `Углубление ${selectedTrigger}`, id }));
+      const all = [...base, ...depth];
+      if (extra) {
+        const t2 = TRIGGERS.find(t => t.id === extra);
+        t2.atoms.slice(0, 1).forEach(id => all.push({ name: `Доп. ${extra}`, id }));
+      }
+      document.getElementById("locoComposition").innerHTML = all.map(a => `<li>${a.name}<span>${a.id}</span></li>`).join("");
+
+      window.__locoKP = `Диагностика ROMI (${tier})\nТриггер: ${trig.title}\nСрок: ${TIER[tier].days}\nСтоимость: ${money(price)}\nNext-step: ${trig.next}`;
+    }
+
+    document.getElementById("copyLoco").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(window.__locoKP || "");
+      const b = document.getElementById("copyLoco");
+      b.textContent = "Скопировано";
+      setTimeout(() => b.textContent = "Скопировать КП-блок", 1200);
+    });
+
+    ["tier", "niche", "rush", "extraTrigger"].forEach(id => {
+      document.getElementById(id).addEventListener("change", calcLoco);
+    });
+
+    // FIX PACKAGES
+    function fixPrice(item, tier) {
+      return tier === "S" ? item.s : tier === "L" ? item.l : item.m;
+    }
+
+    function renderFix() {
+      const q = document.getElementById("fixSearch").value.toLowerCase();
+      const g = document.getElementById("fixGroup").value;
+      const tier = document.getElementById("fixTier").value;
+      const rows = FIX.filter(x => (!g || x.group === g) && (!q || (x.name + x.code).toLowerCase().includes(q)));
+      document.getElementById("fixBody").innerHTML = rows.map(x => `
+        <tr>
+          <td>${x.code}</td>
+          <td>${x.name}</td>
+          <td>${x.group}</td>
+          <td class="money">${money(x.s)}</td>
+          <td class="money">${money(x.m)}</td>
+          <td class="money">${money(x.l)}</td>
+          <td><input type="checkbox" data-code="${x.code}" ${fixSelected.has(x.code) ? "checked" : ""} /></td>
+        </tr>
+      `).join("");
+      document.querySelectorAll("#fixBody input").forEach(i => {
+        i.addEventListener("change", () => {
+          if (i.checked) fixSelected.add(i.dataset.code); else fixSelected.delete(i.dataset.code);
+          renderFixCart();
+        });
+      });
+      renderFixCart();
+    }
+
+    function renderFixCart() {
+      const tier = document.getElementById("fixTier").value;
+      let total = 0;
+      const items = [...fixSelected].map(code => {
+        const x = FIX.find(f => f.code === code);
+        const p = fixPrice(x, tier);
+        total += p;
+        return `<li>${x.code} · ${x.name}<span>${money(p)}</span></li>`;
+      });
+      document.getElementById("fixTotal").innerHTML = `${money(total)}<small>tier ${tier} · ${fixSelected.size} поз.</small>`;
+      document.getElementById("fixCart").innerHTML = items.join("") || "<li>Ничего не выбрано<span>—</span></li>";
+    }
+
+    ["fixSearch", "fixGroup", "fixTier"].forEach(id => {
+      document.getElementById(id).addEventListener("input", renderFix);
+      document.getElementById(id).addEventListener("change", renderFix);
+    });
+
+    // ATOMS
+    async function loadAtoms() {
+      const res = await fetch("services-data.json");
+      const data = await res.json();
+      atoms = data.services;
+      const dirs = [...new Set(atoms.map(a => a.direction))].sort();
+      document.getElementById("atomDir").innerHTML = `<option value="">Все направления</option>` +
+        dirs.map(d => `<option>${d}</option>`).join("");
+      renderAtoms();
+    }
+
+    function renderAtoms() {
+      const q = document.getElementById("atomSearch").value.toLowerCase();
+      const d = document.getElementById("atomDir").value;
+      const sort = document.getElementById("atomSort").value;
+      let rows = atoms.filter(a => (!d || a.direction === d) && (!q || (a.name + a.id).toLowerCase().includes(q)));
+      rows = rows.slice().sort((a, b) => {
+        if (sort === "name") return a.name.localeCompare(b.name, "ru");
+        if (sort === "market") return b.market_avg - a.market_avg;
+        return b.impro_avg - a.impro_avg;
+      });
+      document.getElementById("atomBody").innerHTML = rows.slice(0, 400).map(a => `
+        <tr>
+          <td>${a.id}${a.margin_risk === "YES" ? ' <span class="risk">risk</span>' : ""}</td>
+          <td>${a.name}</td>
+          <td>${a.direction}</td>
+          <td>${a.hours_avg}</td>
+          <td class="money">${money(a.market_avg)}</td>
+          <td class="money">${money(a.cost_avg)}</td>
+          <td class="money">${money(a.impro_avg)}</td>
+        </tr>
+      `).join("");
+    }
+
+    ["atomSearch", "atomDir", "atomSort"].forEach(id => {
+      document.getElementById(id).addEventListener("input", renderAtoms);
+      document.getElementById(id).addEventListener("change", renderAtoms);
+    });
+
+    // TABS
+    document.querySelectorAll("nav.tabs button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("nav.tabs button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const tab = btn.dataset.tab;
+        document.getElementById("tab-loco").classList.toggle("hidden", tab !== "loco");
+        document.getElementById("tab-loco-aside").classList.toggle("hidden", tab !== "loco");
+        document.getElementById("tab-fix").classList.toggle("hidden", tab !== "fix");
+        document.getElementById("tab-fix-aside").classList.toggle("hidden", tab !== "fix");
+        document.getElementById("tab-atoms").classList.toggle("hidden", tab !== "atoms");
+      });
+    });
+
+    renderTriggers();
+    fillExtra();
+    renderOptions();
+    calcLoco();
+    renderFix();
+    loadAtoms().catch(err => {
+      document.getElementById("atomBody").innerHTML = `<tr><td colspan="7">Не удалось загрузить services-data.json (${err.message}). Откройте калькулятор через локальный сервер.</td></tr>`;
+    });
+  </script>
+</body>
+</html>
