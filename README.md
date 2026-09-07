@@ -14,7 +14,9 @@
 
 | Сейчас | Файл |
 |---|---|
-| Локомотив «Диагностика ROMI» | [offers/locomotive-romi-diagnostic.md](offers/locomotive-romi-diagnostic.md) |
+| **Локомотив** «Архитектура вывода» (партнёрство / тендер) | [offers/locomotive-gtm-partnership.md](offers/locomotive-gtm-partnership.md) |
+| Коммерческие модели (тендер / % / подписка) | [docs/commercial-models.md](docs/commercial-models.md) |
+| Младший вход «Диагностика ROMI» | [offers/locomotive-romi-diagnostic.md](offers/locomotive-romi-diagnostic.md) |
 | Фикс-пакеты волны 1 | [catalog/06-fixed-services-wave1.md](catalog/06-fixed-services-wave1.md) |
 | Калькулятор (HTML) | [calculator/index.html](calculator/index.html) |
 | Карточка компании | [docs/company-profile.md](docs/company-profile.md) |

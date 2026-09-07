@@ -252,73 +252,97 @@
 <body>
   <header>
     <div class="brand">Impro <span>Calculator</span></div>
-    <p class="sub">Локомотив «Диагностика ROMI» + каталог фиксированных услуг. Цены — рабочие ориентиры для согласования, не оферта.</p>
+    <p class="sub">Локомотив — стратегическое партнёрство «Архитектура вывода» (тендер на маркетинг). Младший вход и фикс-пакеты — отдельно. Цены — ориентиры, не оферта.</p>
   </header>
 
   <nav class="tabs">
-    <button type="button" class="active" data-tab="loco">Локомотив</button>
-    <button type="button" data-tab="fix">Фикс-пакеты волны 1</button>
-    <button type="button" data-tab="atoms">Каталог атомов (279)</button>
+    <button type="button" class="active" data-tab="loco">Партнёрство / тендер</button>
+    <button type="button" data-tab="fix">Фикс-пакеты</button>
+    <button type="button" data-tab="atoms">Атомы (279)</button>
   </nav>
 
   <main>
     <!-- LOCOMOTIVE -->
     <section id="tab-loco" class="panel">
-      <h2>1. Триггер клиента</h2>
+      <h2>1. Класс проекта (триггер ЛПР)</h2>
       <div class="triggers" id="triggers"></div>
 
       <div class="grid2" style="margin-top:16px">
         <div>
-          <label>Размер / сложность</label>
+          <label>Спринт «Архитектура вывода»</label>
           <select id="tier">
-            <option value="S">S — Express</option>
-            <option value="M" selected>M — Standard</option>
-            <option value="L">L — Deep</option>
+            <option value="S">S — 180к · 2–3 нед</option>
+            <option value="M" selected>M — 350к · 3–5 нед</option>
+            <option value="L">L — 650к · 5–8 нед</option>
           </select>
         </div>
         <div>
-          <label>Нишевой коэффициент</label>
-          <select id="niche">
-            <option value="1">1.0 — стандарт</option>
-            <option value="1.15">1.15 — конкурентная ниша</option>
-            <option value="1.3">1.3 — медицина / финансы</option>
-            <option value="1.5">1.5 — сложный B2B / регулируемые</option>
+          <label>Модель партнёрства после спринта</label>
+          <select id="model">
+            <option value="1" selected>1 — Общий маркетинг. бюджет (тендер) ★</option>
+            <option value="2">2 — % + бюджет</option>
+            <option value="3">3 — Фикс-подписка + бюджет</option>
           </select>
         </div>
       </div>
 
       <div class="grid2">
         <div>
-          <label>Срочность</label>
-          <select id="rush">
-            <option value="1">Обычный срок</option>
-            <option value="1.2">Rush +20%</option>
+          <label>Ориентир бюджета тендера (₽)</label>
+          <select id="envelope">
+            <option value="5000000">5 млн</option>
+            <option value="12000000" selected>12 млн</option>
+            <option value="25000000">25 млн</option>
+            <option value="50000000">50 млн</option>
+            <option value="100000000">100 млн</option>
           </select>
         </div>
         <div>
-          <label>Доп. углубление</label>
-          <select id="extraTrigger">
-            <option value="">Нет</option>
+          <label>Agency fee (% от конверта)</label>
+          <select id="fee">
+            <option value="0.12">12%</option>
+            <option value="0.15" selected>15%</option>
+            <option value="0.18">18%</option>
           </select>
         </div>
       </div>
 
-      <h2 style="margin-top:20px">2. Опции</h2>
+      <div class="grid2">
+        <div>
+          <label>Зачёт спринта в agency fee</label>
+          <select id="credit">
+            <option value="0">Без зачёта</option>
+            <option value="0.5" selected>50% стоимости спринта</option>
+            <option value="1">100% стоимости спринта</option>
+          </select>
+        </div>
+        <div>
+          <label>Ниша</label>
+          <select id="niche">
+            <option value="1">Стандарт</option>
+            <option value="1.15">Конкурентная</option>
+            <option value="1.3">Сложная / регулируемая</option>
+          </select>
+        </div>
+      </div>
+
+      <h2 style="margin-top:20px">2. Опции спринта</h2>
       <div class="fix-services" id="locoOptions"></div>
+      <p class="note" id="modelNote"></p>
     </section>
 
     <aside id="tab-loco-aside" class="panel">
-      <h2>Итог LOC-001</h2>
-      <div class="price" id="locoPrice">89 000 ₽<small>фиксированная стоимость диагностики</small></div>
+      <h2>Итог LOC-002</h2>
+      <div class="price" id="locoPrice">350 000 ₽<small>спринт «Архитектура вывода»</small></div>
       <div class="meta">
-        <div><div class="k">Tier</div><div class="v" id="outTier">M</div></div>
-        <div><div class="k">Срок</div><div class="v" id="outDays">10–15 р.д.</div></div>
-        <div><div class="k">Триггер</div><div class="v" id="outTrig">T1</div></div>
-        <div><div class="k">Next-sell</div><div class="v" id="outNext" style="font-size:13px;font-weight:600">Директ, лендинг</div></div>
+        <div><div class="k">Спринт</div><div class="v" id="outTier">M</div></div>
+        <div><div class="k">Срок</div><div class="v" id="outDays">3–5 нед</div></div>
+        <div><div class="k">Проект</div><div class="v" id="outTrig">P1</div></div>
+        <div><div class="k">Модель</div><div class="v" id="outNext" style="font-size:13px;font-weight:600">Тендер</div></div>
       </div>
-      <h2>Состав</h2>
+      <h2>Конверт партнёрства</h2>
       <ul class="list" id="locoComposition"></ul>
-      <p class="note">В отчёте — оценка всех 6 блоков Impro (Performance, Контент, Стратегия, Веб/MarTech, Брендинг, ИИ), даже если углубление одно. Так клиент видит ширину агентства.</p>
+      <p class="note">Спринт продаёт Impro как генподрядчика маркетинга. Дальше — общий бюджет (модель 1), не «пакет SEO». Диагностика ROMI — младший вход для SMB.</p>
       <button type="button" id="copyLoco" style="margin-top:14px;width:100%;padding:12px;border-radius:8px;border:0;background:var(--accent);color:#0b1210;font-family:var(--font-d);font-weight:700;cursor:pointer">Скопировать КП-блок</button>
     </aside>
 
@@ -400,31 +424,36 @@
 
   <script>
     const TRIGGERS = [
-      { id: "T1", title: "Реклама дорогая / мало лидов", depth: "PPC + посадочные + аналитика", next: "Директ / VK, лендинг, CRO", atoms: ["M-021", "M-033"] },
-      { id: "T2", title: "Сайт не конвертит", depth: "UX + CRO + SEO light", next: "Лендинг, SEO этап 1", atoms: ["IT-004", "M-033", "M-003"] },
-      { id: "T3", title: "Лиды есть — продажи слабые", depth: "Воронка + CRM", next: "CRM, регламенты продаж", atoms: ["C-006", "M-081"] },
-      { id: "T4", title: "Не видим цифры / ROMI", depth: "Сквозная + Метрика", next: "Сквозная, BI, коллтрекинг", atoms: ["M-052", "M-050"] },
-      { id: "T5", title: "Неясное позиционирование", depth: "Оффер + конкуренты", next: "Бренд-платформа, контент", atoms: ["M-094", "M-111"] },
-      { id: "T6", title: "Хотим ИИ / нейропоиск", depth: "AI SEO / GEO", next: "AI SEO, GEO, боты", atoms: ["N-001", "N-033"] },
-      { id: "T7", title: "Запуск продукта / рынка", depth: "GTM + юнит-экономика", next: "GTM, медиаплан, связка лендинг+реклама", atoms: ["M-109", "M-110"] },
-      { id: "T8", title: "Репутация мешает продажам", depth: "SERM + карточки", next: "SERM, PR", atoms: ["M-067", "M-012"] },
+      { id: "P1", title: "Выводим новую линейку / продукт", depth: "Full GTM: смысл → кампании → контроль", next: "Тендер на запуск" },
+      { id: "P2", title: "Репозиционирование / новая ЦА", depth: "Смысл + коммуникационная платформа + кампания", next: "Тендер на репозиционирование" },
+      { id: "P3", title: "Новый регион / сегмент", depth: "Market entry architecture", next: "Тендер market entry" },
+      { id: "P4", title: "Крупный сезонный / event-запуск", depth: "Campaign architecture", next: "Бюджет кампании" },
+      { id: "P5", title: "Нужен один ответственный за маркетинг", depth: "AOR / генподряд", next: "Модель 1 или 3" },
+      { id: "P6", title: "Есть бюджет — нет системы ROMI", depth: "Budget governance + архитектура", next: "Конверт + контроль" },
     ];
 
     const TIER = {
-      S: { price: 49000, days: "7–10 р.д.", hours: "28–36" },
-      M: { price: 89000, days: "10–15 р.д.", hours: "45–60" },
-      L: { price: 149000, days: "15–20 р.д.", hours: "75–100" },
+      S: { price: 180000, days: "2–3 нед", hours: "спринт S" },
+      M: { price: 350000, days: "3–5 нед", hours: "спринт M" },
+      L: { price: 650000, days: "5–8 нед", hours: "спринт L" },
+    };
+
+    const MODELS = {
+      "1": "Тендер · общий маркетинг. бюджет",
+      "2": "% + бюджет",
+      "3": "Подписка AOR + бюджет",
     };
 
     const OPTIONS = [
-      { id: "custdev", name: "CustDev 5 интервью", price: 45000 },
-      { id: "mystery", name: "Mystery shopping light", price: 35000 },
-      { id: "aigeo", name: "AI SEO + GEO блок", price: 55000 },
-      { id: "session", name: "Расширенная стратег-сессия", price: 40000 },
+      { id: "custdev", name: "CustDev 8–10 интервью", price: 90000 },
+      { id: "creative", name: "Креативная платформа (расширенная)", price: 120000 },
+      { id: "video", name: "Бриф + препродакшн ролика", price: 80000 },
+      { id: "board", name: "Защита перед советом директоров", price: 60000 },
     ];
 
     const FIX = [
-      { code: "LOC-001", name: "Диагностика ROMI", group: "Локомотив", s: 49000, m: 89000, l: 149000 },
+      { code: "LOC-002", name: "Архитектура вывода (спринт)", group: "Локомотив", s: 180000, m: 350000, l: 650000 },
+      { code: "LOC-001", name: "Диагностика ROMI (младший вход)", group: "Локомотив", s: 49000, m: 89000, l: 149000 },
       { code: "FIX-P01", name: "Аудит Яндекс.Директ", group: "Performance", s: 25000, m: 40000, l: 65000 },
       { code: "FIX-P02", name: "Настройка Директ с нуля", group: "Performance", s: 45000, m: 70000, l: 110000 },
       { code: "FIX-P03", name: "Аудит VK Ads", group: "Performance", s: 20000, m: 30000, l: 50000 },
@@ -452,7 +481,7 @@
     ];
 
     const money = n => new Intl.NumberFormat("ru-RU").format(Math.round(n)) + " ₽";
-    let selectedTrigger = "T1";
+    let selectedTrigger = "P1";
     let fixSelected = new Set();
     let atoms = [];
 
@@ -461,24 +490,16 @@
       box.innerHTML = TRIGGERS.map(t => `
         <button type="button" class="trig ${t.id === selectedTrigger ? "active" : ""}" data-id="${t.id}">
           <b>${t.id}. ${t.title}</b>
-          <small>Углубление: ${t.depth}</small>
+          <small>${t.depth}</small>
         </button>
       `).join("");
       box.querySelectorAll(".trig").forEach(btn => {
         btn.addEventListener("click", () => {
           selectedTrigger = btn.dataset.id;
           renderTriggers();
-          fillExtra();
           calcLoco();
         });
       });
-    }
-
-    function fillExtra() {
-      const sel = document.getElementById("extraTrigger");
-      sel.innerHTML = `<option value="">Нет</option>` + TRIGGERS
-        .filter(t => t.id !== selectedTrigger)
-        .map(t => `<option value="${t.id}">${t.id} — ${t.title}</option>`).join("");
     }
 
     function renderOptions() {
@@ -491,39 +512,58 @@
     function calcLoco() {
       const tier = document.getElementById("tier").value;
       const niche = parseFloat(document.getElementById("niche").value);
-      const rush = parseFloat(document.getElementById("rush").value);
-      const extra = document.getElementById("extraTrigger").value;
+      const model = document.getElementById("model").value;
+      const envelope = parseFloat(document.getElementById("envelope").value);
+      const feePct = parseFloat(document.getElementById("fee").value);
+      const credit = parseFloat(document.getElementById("credit").value);
       const trig = TRIGGERS.find(t => t.id === selectedTrigger);
-      let price = TIER[tier].price * niche * rush;
-      if (extra) price += tier === "S" ? 15000 : tier === "M" ? 25000 : 35000;
+
+      let sprint = TIER[tier].price * niche;
       let optSum = 0;
       document.querySelectorAll("#locoOptions input:checked").forEach(i => {
         const o = OPTIONS.find(x => x.id === i.dataset.opt);
         if (o) optSum += o.price;
       });
-      price += optSum;
+      sprint += optSum;
 
-      document.getElementById("locoPrice").innerHTML = `${money(price)}<small>фикс · ${TIER[tier].hours} ч · ниша ×${niche}${rush > 1 ? " · rush" : ""}</small>`;
+      const agencyFee = envelope * feePct;
+      const creditAmt = sprint * credit;
+      const feeNet = Math.max(agencyFee - creditAmt, 0);
+      const mediaProd = envelope - agencyFee;
+
+      document.getElementById("locoPrice").innerHTML = `${money(sprint)}<small>спринт LOC-002 · затем конверт ${money(envelope)}</small>`;
       document.getElementById("outTier").textContent = tier;
       document.getElementById("outDays").textContent = TIER[tier].days;
-      document.getElementById("outTrig").textContent = selectedTrigger + (extra ? " +" + extra : "");
-      document.getElementById("outNext").textContent = trig.next;
+      document.getElementById("outTrig").textContent = selectedTrigger;
+      document.getElementById("outNext").textContent = MODELS[model];
 
-      const base = [
-        { name: "Каркас: воронка лидогенерации end-to-end", id: "M-116" },
-        { name: "Аудит веб-аналитики", id: "M-048" },
-        { name: "Overview 6 блоков Impro", id: "M-108 light" },
-        { name: "Бизнес-контекст (экспресс)", id: "C-001 light" },
-      ];
-      const depth = trig.atoms.map(id => ({ name: `Углубление ${selectedTrigger}`, id }));
-      const all = [...base, ...depth];
-      if (extra) {
-        const t2 = TRIGGERS.find(t => t.id === extra);
-        t2.atoms.slice(0, 1).forEach(id => all.push({ name: `Доп. ${extra}`, id }));
-      }
-      document.getElementById("locoComposition").innerHTML = all.map(a => `<li>${a.name}<span>${a.id}</span></li>`).join("");
+      document.getElementById("locoComposition").innerHTML = [
+        { name: "Маркетинговый бюджет (конверт)", id: money(envelope) },
+        { name: `Agency fee ${Math.round(feePct*100)}%`, id: money(agencyFee) },
+        { name: "Зачёт спринта", id: "−" + money(creditAmt) },
+        { name: "Agency fee к оплате (после зачёта)", id: money(feeNet) },
+        { name: "Media / production / прочее в конверте", id: money(mediaProd) },
+        { name: "Смысл + позиционирование + архитектура кампаний", id: "в спринте" },
+        { name: "Next", id: trig.next },
+      ].map(a => `<li>${a.name}<span>${a.id}</span></li>`).join("");
 
-      window.__locoKP = `Диагностика ROMI (${tier})\nТриггер: ${trig.title}\nСрок: ${TIER[tier].days}\nСтоимость: ${money(price)}\nNext-step: ${trig.next}`;
+      document.getElementById("modelNote").textContent =
+        model === "1"
+          ? "Модель 1: клиент утверждает один конверт — Impro генподрядчик (стратегия, креатив, медиа, контроль)."
+          : model === "2"
+          ? "Модель 2: % от бюджета/результата + отдельные статьи. Юридически KPI = целевые, не гарантия."
+          : "Модель 3: ежемесячный retainer за партнёрство + бюджеты кампаний отдельно.";
+
+      window.__locoKP = [
+        `Impro · Архитектура вывода (${tier})`,
+        `Проект: ${trig.id} — ${trig.title}`,
+        `Спринт: ${money(sprint)} · ${TIER[tier].days}`,
+        `Модель: ${MODELS[model]}`,
+        `Конверт бюджета: ${money(envelope)}`,
+        `Agency fee ${Math.round(feePct*100)}%: ${money(agencyFee)} (зачёт спринта ${money(creditAmt)})`,
+        `К оплате agency после зачёта: ${money(feeNet)}`,
+        `Далее: ${trig.next}`,
+      ].join("\n");
     }
 
     document.getElementById("copyLoco").addEventListener("click", async () => {
@@ -533,7 +573,7 @@
       setTimeout(() => b.textContent = "Скопировать КП-блок", 1200);
     });
 
-    ["tier", "niche", "rush", "extraTrigger"].forEach(id => {
+    ["tier", "niche", "model", "envelope", "fee", "credit"].forEach(id => {
       document.getElementById(id).addEventListener("change", calcLoco);
     });
 
