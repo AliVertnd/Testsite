@@ -26,6 +26,7 @@
 | Документ | Файл |
 |---|---|
 | Функции + цены (аутсорс / бюджет) | [catalog/07-functions-responsibility-pricing.md](catalog/07-functions-responsibility-pricing.md) |
+| Рынок: похожие модели и цены | [research/market-peers-outsourced-model.md](research/market-peers-outsourced-model.md) |
 | JSON функций для Bitrix/калькулятора | [catalog/functions-pricing.json](catalog/functions-pricing.json) |
 | Холодка M0–M3 × локомотив → A | [offers/cold-m0-m3-locomotive.md](offers/cold-m0-m3-locomotive.md) |
 | Архитектура A / B | [docs/agency-offer-architecture.md](docs/agency-offer-architecture.md) |
