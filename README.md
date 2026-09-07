@@ -25,6 +25,7 @@
 
 | Документ | Файл |
 |---|---|
+| Холодка M0–M3 × локомотив → A | [offers/cold-m0-m3-locomotive.md](offers/cold-m0-m3-locomotive.md) |
 | Архитектура A / B | [docs/agency-offer-architecture.md](docs/agency-offer-architecture.md) |
 | Логика локомотива (холодка) | [offers/locomotive-logic-cold.md](offers/locomotive-logic-cold.md) |
 | Пилотный конверт | [offers/locomotive-pilot-envelope.md](offers/locomotive-pilot-envelope.md) |
