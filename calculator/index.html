@@ -675,12 +675,154 @@
       document.getElementById(id).addEventListener("change", renderAtoms);
     });
 
+    // FUNCTIONS (аутсорс / бюджет)
+    let fnData = { functions: [], complexes: [] };
+    const fnSelected = {}; // code -> tier
+
+    async function loadFunctions() {
+      const res = await fetch("functions-pricing.json");
+      fnData = await res.json();
+      document.getElementById("fnComplex").innerHTML =
+        `<option value="">Собрать вручную из FN</option>` +
+        fnData.complexes.map(c => `<option value="${c.code}">${c.name} · ${money(c.price)}</option>`).join("");
+      renderFnList();
+      calcFn();
+    }
+
+    function renderFnList() {
+      document.getElementById("fnList").innerHTML = fnData.functions.map(f => {
+        const tier = fnSelected[f.code] || "";
+        return `<label class="row" style="flex-wrap:wrap">
+          <input type="checkbox" data-fn="${f.code}" ${tier ? "checked" : ""} />
+          <span style="flex:1"><b>${f.code}</b> · ${f.name}<br/>
+          <small style="color:var(--muted)">${f.block} · S ${money(f.price.S)} / M ${money(f.price.M)} / L ${money(f.price.L)}</small></span>
+          <select data-fn-tier="${f.code}" style="width:72px;margin-left:auto" ${tier ? "" : "disabled"}>
+            <option value="S" ${tier==="S"?"selected":""}>S</option>
+            <option value="M" ${tier==="M"||!tier?"selected":""}>M</option>
+            <option value="L" ${tier==="L"?"selected":""}>L</option>
+          </select>
+        </label>`;
+      }).join("");
+
+      document.querySelectorAll("#fnList input[data-fn]").forEach(cb => {
+        cb.addEventListener("change", () => {
+          const code = cb.dataset.fn;
+          const sel = document.querySelector(`select[data-fn-tier="${code}"]`);
+          if (cb.checked) {
+            fnSelected[code] = sel.value || "M";
+            sel.disabled = false;
+          } else {
+            delete fnSelected[code];
+            sel.disabled = true;
+          }
+          document.getElementById("fnComplex").value = "";
+          calcFn();
+        });
+      });
+      document.querySelectorAll("#fnList select[data-fn-tier]").forEach(sel => {
+        sel.addEventListener("change", () => {
+          const code = sel.dataset.fnTier;
+          if (fnSelected[code]) {
+            fnSelected[code] = sel.value;
+            calcFn();
+          }
+        });
+      });
+    }
+
+    function applyComplex(code) {
+      Object.keys(fnSelected).forEach(k => delete fnSelected[k]);
+      const c = fnData.complexes.find(x => x.code === code);
+      if (c) c.functions.forEach(([fn, tier]) => { fnSelected[fn] = tier; });
+      renderFnList();
+      calcFn();
+    }
+
+    function calcFn() {
+      const format = document.getElementById("fnFormat").value;
+      document.getElementById("fnFormat1Wrap").style.display = format === "1" ? "grid" : "none";
+
+      let subtotal = 0, hours = 0, media = false;
+      const lines = [];
+      Object.entries(fnSelected).forEach(([code, tier]) => {
+        const f = fnData.functions.find(x => x.code === code);
+        if (!f) return;
+        const p = f.price[tier];
+        const h = f.hours[tier];
+        subtotal += p;
+        hours += h;
+        if (f.media_extra) media = true;
+        lines.push({ name: `${code} · ${f.name} (${tier})`, price: p });
+      });
+
+      let total = subtotal;
+      let label = "подписка / мес";
+      if (format === "1") {
+        const env = parseFloat(document.getElementById("fnEnvelope").value) || 0;
+        const share = parseFloat(document.getElementById("fnShare").value);
+        const impro = Math.round(env * share);
+        // In format 1 show envelope as client payment, impro share as our responsibility fee
+        total = env;
+        label = `конверт · работа Impro ${money(impro)} (${Math.round(share*100)}%)`;
+        document.getElementById("fnOutFormat").textContent = "Бюджет/%";
+        document.getElementById("fnCart").innerHTML =
+          [`<li>Конверт действия<span>${money(env)}</span></li>`,
+           `<li>Работа Impro (${Math.round(share*100)}%)<span>${money(impro)}</span></li>`,
+           `<li>Media / production / прочее<span>${money(env - impro)}</span></li>`,
+           ...lines.map(l => `<li>FN в ответственности: ${l.name}<span>~${money(l.price)}/мес экв.</span></li>`)
+          ].join("") || "<li>—</li>";
+        document.getElementById("fnPrice").innerHTML = `${money(total)}<small>${label}</small>`;
+        window.__fnKP = [
+          `Impro · Формат 1 — бюджет/действие`,
+          `Конверт: ${money(env)}`,
+          `Работа Impro: ${money(impro)} (${Math.round(share*100)}%)`,
+          `Ответственность FN:`,
+          ...lines.map(l => `• ${l.name}`),
+          `Медиа/лицензии: отдельно внутри конверта`,
+        ].join("\n");
+      } else {
+        document.getElementById("fnOutFormat").textContent = "Подписка";
+        document.getElementById("fnCart").innerHTML =
+          lines.map(l => `<li>${l.name}<span>${money(l.price)}</span></li>`).join("") ||
+          "<li>Выберите функции или шаблон<span>—</span></li>";
+        document.getElementById("fnPrice").innerHTML = `${money(total)}<small>${label}</small>`;
+        window.__fnKP = [
+          `Impro · Формат 2 — подписка / аутсорс`,
+          `Стоимость: ${money(total)} / мес`,
+          `Часы≈ ${hours}/мес`,
+          `Ответственность:`,
+          ...lines.map(l => `• ${l.name} — ${money(l.price)}`),
+          `Медиа и лицензии: отдельно`,
+        ].join("\n");
+      }
+
+      document.getElementById("fnOutCount").textContent = String(Object.keys(fnSelected).length);
+      document.getElementById("fnOutHours").textContent = String(hours);
+      document.getElementById("fnOutMedia").textContent = media ? "нужен бюджет" : "отдельно";
+    }
+
+    document.getElementById("fnFormat").addEventListener("change", calcFn);
+    document.getElementById("fnEnvelope").addEventListener("input", calcFn);
+    document.getElementById("fnShare").addEventListener("change", calcFn);
+    document.getElementById("fnComplex").addEventListener("change", e => {
+      if (e.target.value) applyComplex(e.target.value);
+      else { Object.keys(fnSelected).forEach(k => delete fnSelected[k]); renderFnList(); calcFn(); }
+    });
+    document.getElementById("copyFn").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(window.__fnKP || "");
+      const b = document.getElementById("copyFn");
+      b.textContent = "Скопировано";
+      setTimeout(() => b.textContent = "Скопировать КП-блок", 1200);
+    });
+
     // TABS
     document.querySelectorAll("nav.tabs button").forEach(btn => {
       btn.addEventListener("click", () => {
         document.querySelectorAll("nav.tabs button").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         const tab = btn.dataset.tab;
+        document.getElementById("tab-fn").classList.toggle("hidden", tab !== "fn");
+        document.getElementById("tab-fn-aside").classList.toggle("hidden", tab !== "fn");
         document.getElementById("tab-loco").classList.toggle("hidden", tab !== "loco");
         document.getElementById("tab-loco-aside").classList.toggle("hidden", tab !== "loco");
         document.getElementById("tab-fix").classList.toggle("hidden", tab !== "fix");
@@ -692,6 +834,7 @@
     renderTriggers();
     calcLoco();
     renderFix();
+    loadFunctions().catch(console.error);
     loadAtoms().catch(err => {
       document.getElementById("atomBody").innerHTML = `<tr><td colspan="7">Не удалось загрузить services-data.json (${err.message}). Откройте калькулятор через локальный сервер.</td></tr>`;
     });
