@@ -1,7 +1,7 @@
 # Холодка M0–M3 + PM × локомотив → партнёрство A
 
 **Статус:** оценка модели + схема внедрения  
-**Связь:** `docs/agency-offer-architecture.md` · `offers/locomotive-pilot-envelope.md` · `offers/locomotive-logic-cold.md`
+**Связь:** `docs/agency-offer-architecture.md` · `offers/LOC-PILOT-canon.md` · `offers/locomotive-logic-cold.md`
 
 ---
 
@@ -70,7 +70,7 @@ ICP score → персональный хук → discovery call
 | | Трек A | Трек B |
 |---|---|---|
 | Цель | Партнёрство / % / годовой бюджет | Кусочек / пакет |
-| Локомотив / первый продукт | **Пилотный конверт функции** (LOC-003) | FIX-пакет (SEO, Директ…) |
+| Локомотив / первый продукт | **Пилотный конверт** (LOC-PILOT) | FIX-пакет (SEO, Директ…) |
 | ЛПР | Собственник / CEO / коммерческий | Маркетолог / подрядчик-менеджер |
 | Сигналы | Вакансия CMO, рост, дыра в функции, новый продукт | «Нужен SEO», узкий бриф |
 | M3 договор | Пилот → путь к A | Фикс-scope |
@@ -144,7 +144,7 @@ RAG:
 |---|---|
 | Dialogue interpreter | Тейки, возражения, сила интереса |
 | Offer architect | Собирает КП строго из реальных услуг A/B |
-| Locomotive agent (A) | Только LOC-003 + путь к %/конверту/партнёрству |
+| Locomotive agent (A) | Только LOC-PILOT + путь к %/конверту/партнёрству |
 | Piece agent (B) | FIX / атомы / цена |
 | Coach / QA менеджера | Оценка созвона → воронка управления |
 | Call-copilot | Сначала post-call / prep; realtime — позже |
@@ -244,7 +244,7 @@ PM  исполнение → decision → % / партнёрство / годо�
 | fit_A / fit_B | M0–M2 |
 | triggers[] / hooks[] | M1–PM |
 | north_star (%, partnership, annual_envelope) | M2+ |
-| entry_offer (LOC-003 / FIX-*) | M2–M3 |
+| entry_offer (LOC-PILOT / FIX-*) | M2–M3 |
 | strategy_card | M3–PM |
 | call_notes + dialogue_analytics | M2–PM |
 | manager_qa_score | M2 |

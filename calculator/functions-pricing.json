@@ -34,9 +34,11 @@
   "format1": {
     "impro_share_default": 0.35,
     "pilots": [
-      {"code": "PILOT-SMOKE", "name": "Пилот Smoke 30д", "envelope_min": 600000, "envelope_default": 800000, "impro_share": 0.35},
-      {"code": "PILOT-STD", "name": "Пилот Standard 60д", "envelope_min": 1500000, "envelope_default": 2000000, "impro_share": 0.35},
-      {"code": "PILOT-SERIOUS", "name": "Пилот Serious 90д", "envelope_min": 3000000, "envelope_default": 5000000, "impro_share": 0.32}
-    ]
+      {"code": "LOC-PILOT-SMOKE", "name": "Пилот Smoke 30д", "envelope_min": 600000, "envelope_default": 800000, "envelope_max": 1200000, "impro_share": 0.35},
+      {"code": "LOC-PILOT-STD", "name": "Пилот Standard 60д", "envelope_min": 1500000, "envelope_default": 2000000, "envelope_max": 3000000, "impro_share": 0.35},
+      {"code": "LOC-PILOT-SERIOUS", "name": "Пилот Serious 90д", "envelope_min": 3500000, "envelope_default": 5000000, "envelope_max": 8000000, "impro_share": 0.35}
+    ],
+    "min_impro": 250000,
+    "canon": "offers/LOC-PILOT-canon.md"
   }
 }

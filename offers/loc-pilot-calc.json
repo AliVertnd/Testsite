@@ -1,0 +1,80 @@
+{
+  "offer_code": "LOC-PILOT",
+  "name": "Пилотный конверт коммерциализации",
+  "impro_share_default": 0.35,
+  "impro_share_min": 0.30,
+  "impro_share_max": 0.40,
+  "min_impro": 250000,
+  "credit_to_next_pct": 1.0,
+  "tiers": [
+    {
+      "id": "smoke",
+      "label": "Smoke",
+      "days": 30,
+      "envelope_default": 800000,
+      "envelope_min": 600000,
+      "envelope_max": 1200000
+    },
+    {
+      "id": "standard",
+      "label": "Standard",
+      "days": 60,
+      "envelope_default": 2000000,
+      "envelope_min": 1500000,
+      "envelope_max": 3000000
+    },
+    {
+      "id": "serious",
+      "label": "Serious",
+      "days": 90,
+      "envelope_default": 5000000,
+      "envelope_min": 3500000,
+      "envelope_max": 8000000
+    }
+  ],
+  "impro_internal_split": {
+    "analytics_consulting": 0.20,
+    "creative": 0.15,
+    "execution": 0.55,
+    "pm": 0.10
+  },
+  "modules": [
+    {"code": "MKT-PERF", "name": "Performance (Директ/VK/TG/Авито)"},
+    {"code": "MKT-SEO", "name": "SEO / AI SEO"},
+    {"code": "MKT-CLASS", "name": "Классифайды"},
+    {"code": "IT-LAND", "name": "Лендинг / квиз / трекинг"},
+    {"code": "IT-CRM", "name": "CRM-воронка light"},
+    {"code": "COM-ENABLE", "name": "Стык с ОП / обучение light"}
+  ],
+  "triggers": [
+    {"code": "T1", "name": "Вакансия CMO/маркетолога", "default_tier": "standard", "modules": ["MKT-PERF", "IT-LAND", "COM-ENABLE"]},
+    {"code": "T2", "name": "Дорогой лид / мало сделок", "default_tier": "standard", "modules": ["MKT-PERF", "IT-CRM", "COM-ENABLE"]},
+    {"code": "T3", "name": "Запуск ЖК / линейки", "default_tier": "serious", "modules": ["MKT-PERF", "MKT-CLASS", "IT-LAND", "COM-ENABLE"]},
+    {"code": "T4", "name": "Сайт/CRM хаос", "default_tier": "smoke", "modules": ["IT-LAND", "IT-CRM", "COM-ENABLE"]},
+    {"code": "T5", "name": "Проверить агентство", "default_tier": "smoke", "modules": ["MKT-PERF"]},
+    {"code": "T6", "name": "Сезон / акция", "default_tier": "standard", "modules": ["MKT-PERF"]}
+  ],
+  "niche_examples": [
+    {
+      "niche": "modular_homes",
+      "trigger": "T2",
+      "tier": "standard",
+      "envelope": 2000000,
+      "goal": "Снизить стоимость договора и поднять % квалификации лидов"
+    },
+    {
+      "niche": "renovation",
+      "trigger": "T5",
+      "tier": "smoke",
+      "envelope": 800000,
+      "goal": "Проверить связку трафик → смета за 30 дней"
+    },
+    {
+      "niche": "developer",
+      "trigger": "T3",
+      "tier": "serious",
+      "envelope": 5000000,
+      "goal": "Первая волна спроса на новый корпус / очередь"
+    }
+  ]
+}

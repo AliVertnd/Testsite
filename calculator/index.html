@@ -312,28 +312,33 @@
       <button type="button" id="copyFn" style="margin-top:14px;width:100%;padding:12px;border-radius:8px;border:0;background:var(--accent);color:#0b1210;font-family:var(--font-d);font-weight:700;cursor:pointer">Скопировать КП-блок</button>
     </aside>
 
-    <!-- LOCOMOTIVE -->
+    <!-- LOCOMOTIVE LOC-PILOT -->
     <section id="tab-loco" class="panel hidden">
-      <h2>1. Цель пилота</h2>
+      <h2>1. Триггер и цель · LOC-PILOT</h2>
       <div class="triggers" id="triggers"></div>
+      <p class="note" id="modulesNote" style="margin-top:10px"></p>
 
       <div class="grid2" style="margin-top:16px">
         <div>
           <label>Ступень пилота</label>
           <select id="tier">
-            <option value="S">Smoke · 30 дней</option>
-            <option value="M" selected>Standard · 60 дней</option>
-            <option value="L">Serious · 90 дней</option>
+            <option value="S">Smoke · 30 дней · 800 тыс</option>
+            <option value="M" selected>Standard · 60 дней · 2 млн</option>
+            <option value="L">Serious · 90 дней · 5 млн</option>
           </select>
         </div>
         <div>
-          <label>Пилотный конверт (всё включено), ₽</label>
+          <label>Пилотный конверт (вариант A), ₽</label>
           <select id="envelope">
-            <option value="600000">600 тыс</option>
-            <option value="1500000" selected>1.5 млн</option>
-            <option value="3000000">3 млн</option>
-            <option value="5000000">5 млн</option>
-            <option value="8000000">8 млн</option>
+            <option value="600000">600 тыс (низ Smoke)</option>
+            <option value="800000">800 тыс (Smoke ★)</option>
+            <option value="1200000">1.2 млн (верх Smoke)</option>
+            <option value="1500000">1.5 млн (низ Standard)</option>
+            <option value="2000000" selected>2 млн (Standard ★)</option>
+            <option value="3000000">3 млн (верх Standard)</option>
+            <option value="3500000">3.5 млн (низ Serious)</option>
+            <option value="5000000">5 млн (Serious ★)</option>
+            <option value="8000000">8 млн (верх Serious)</option>
           </select>
         </div>
       </div>
@@ -342,24 +347,25 @@
         <div>
           <label>Доля работы Impro в конверте</label>
           <select id="fee">
-            <option value="0.25">25%</option>
-            <option value="0.35" selected>35%</option>
-            <option value="0.45">45%</option>
+            <option value="0.30">30%</option>
+            <option value="0.35" selected>35% ★</option>
+            <option value="0.40">40%</option>
           </select>
         </div>
         <div>
           <label>После пилота — целевая модель</label>
           <select id="model">
-            <option value="1" selected>Большой конверт (бюджет + результат)</option>
-            <option value="3">Partner Retainer (часы)</option>
-            <option value="2">% + бюджет</option>
+            <option value="ox" selected>OX-COM / OX-MKT (подписка К2)</option>
+            <option value="k1">Большой конверт К1 / %</option>
+            <option value="ret">Partner Retainer (часы)</option>
+            <option value="b">Узкий B / FN</option>
           </select>
         </div>
       </div>
 
       <div class="grid2">
         <div>
-          <label>Зачёт работы Impro в следующий конверт</label>
+          <label>Зачёт Impro при продолжении ≤30д</label>
           <select id="credit">
             <option value="1" selected>100%</option>
             <option value="0.5">50%</option>
@@ -367,7 +373,7 @@
           </select>
         </div>
         <div>
-          <label>Сложность ниши</label>
+          <label>Сложность ниши (множитель конверта)</label>
           <select id="niche">
             <option value="1">Стандарт</option>
             <option value="1.15">Выше среднего</option>
@@ -376,20 +382,21 @@
         </div>
       </div>
       <p class="note" id="modelNote"></p>
+      <p class="note" id="minNote"></p>
     </section>
 
     <aside id="tab-loco-aside" class="panel hidden">
-      <h2>Итог LOC-003</h2>
-      <div class="price" id="locoPrice">1 500 000 ₽<small>пилотный конверт под результат</small></div>
+      <h2>Итог LOC-PILOT</h2>
+      <div class="price" id="locoPrice">2 000 000 ₽<small>пилотный конверт коммерциализации</small></div>
       <div class="meta">
-        <div><div class="k">Ступень</div><div class="v" id="outTier">M</div></div>
+        <div><div class="k">Ступень</div><div class="v" id="outTier">Standard</div></div>
         <div><div class="k">Срок</div><div class="v" id="outDays">60 дней</div></div>
-        <div><div class="k">Цель</div><div class="v" id="outTrig">P1</div></div>
-        <div><div class="k">Дальше</div><div class="v" id="outNext" style="font-size:13px;font-weight:600">Большой конверт</div></div>
+        <div><div class="k">Триггер</div><div class="v" id="outTrig">T2</div></div>
+        <div><div class="k">Дальше</div><div class="v" id="outNext" style="font-size:13px;font-weight:600">OX-COM</div></div>
       </div>
       <h2>Разложение конверта</h2>
       <ul class="list" id="locoComposition"></ul>
-      <p class="note">Клиент платит один конверт. Impro само решает, что делать для цели. Это мини-версия идеала — не продажа плана.</p>
+      <p class="note">Канон: offers/LOC-PILOT-canon.md · клиент платит один конверт · Impro решает состав под цель.</p>
       <button type="button" id="copyLoco" style="margin-top:14px;width:100%;padding:12px;border-radius:8px;border:0;background:var(--accent);color:#0b1210;font-family:var(--font-d);font-weight:700;cursor:pointer">Скопировать КП-блок</button>
     </aside>
 
@@ -436,7 +443,7 @@
       <h2>Корзина фикс-пакетов</h2>
       <div class="price" id="fixTotal">0 ₽<small>сумма выбранных пакетов</small></div>
       <ul class="list" id="fixCart"></ul>
-      <p class="note">Пакеты — для точечных задач и SMB. Стратегические проекты идут через LOC-002 → тендер.</p>
+      <p class="note">Пакеты — для точечных задач и SMB. Стратегический вход — LOC-PILOT → OX / большой конверт.</p>
     </aside>
 
     <!-- ATOMS -->
@@ -472,31 +479,37 @@
 
   <script>
     const TRIGGERS = [
-      { id: "P1", title: "Новая линейка / продукт", depth: "Первая волна спроса под одну цель", next: "Большой конверт на вывод" },
-      { id: "P2", title: "Реклама есть — результата нет", depth: "Перезапуск одного контура под ROMI", next: "Расширение конверта / retainer" },
-      { id: "P3", title: "Нужен один ответственный", depth: "60–90 дней «как генподряд» на узком scope", next: "Большой конверт или AOR" },
-      { id: "P4", title: "Сезон / акция / event", depth: "Одна кампания end-to-end", next: "Серия кампаний в конверте" },
-      { id: "P5", title: "Проверить Impro до большого бюджета", depth: "Любая одна цель + decision gate", next: "Решение по модели" },
+      { id: "T1", title: "Вакансия CMO / маркетолога", depth: "Закрыть функцию без найма 60–90д", modules: ["MKT-PERF", "IT-LAND", "COM-ENABLE"], defaultTier: "M", next: "OX-COM / большой конверт" },
+      { id: "T2", title: "Дорогой лид / мало сделок", depth: "CPL + квалификация + стык с ОП", modules: ["MKT-PERF", "IT-CRM", "COM-ENABLE"], defaultTier: "M", next: "OX-COM" },
+      { id: "T3", title: "Запуск ЖК / линейки", depth: "Первая волна спроса", modules: ["MKT-PERF", "MKT-CLASS", "IT-LAND", "COM-ENABLE"], defaultTier: "L", next: "Большой К1 / OX-COM" },
+      { id: "T4", title: "Сайт / CRM хаос", depth: "Контур лид → CRM", modules: ["IT-LAND", "IT-CRM", "COM-ENABLE"], defaultTier: "S", next: "OX-IT + OX-MKT light" },
+      { id: "T5", title: "Проверить агентство", depth: "Decision quality 30–60д", modules: ["MKT-PERF"], defaultTier: "S", next: "Решение по модели" },
+      { id: "T6", title: "Сезон / акция", depth: "Одна кампания end-to-end", modules: ["MKT-PERF"], defaultTier: "M", next: "Серия в конверте / OX-MKT" },
     ];
 
     const TIER = {
-      S: { days: "30 дней", label: "Smoke" },
-      M: { days: "60 дней", label: "Standard" },
-      L: { days: "90 дней", label: "Serious" },
+      S: { days: "30 дней", label: "Smoke", defaultEnvelope: 800000 },
+      M: { days: "60 дней", label: "Standard", defaultEnvelope: 2000000 },
+      L: { days: "90 дней", label: "Serious", defaultEnvelope: 5000000 },
     };
 
     const MODELS = {
-      "1": "Большой конверт",
-      "2": "% + бюджет",
-      "3": "Partner Retainer",
+      ox: "OX-COM / OX-MKT",
+      k1: "Большой конверт К1 / %",
+      ret: "Partner Retainer",
+      b: "Узкий B / FN",
     };
 
+    const MIN_IMPRO = 250000;
+
     const FIX = [
-      { code: "LOC-003", name: "Пилотный конверт (локомотив)", group: "Локомотив", s: 600000, m: 1500000, l: 5000000 },
+      { code: "LOC-PILOT", name: "Пилотный конверт (локомотив)", group: "Локомотив", s: 800000, m: 2000000, l: 5000000 },
+      { code: "OX-MKT", name: "Маркетинг на аутсорсе (мес)", group: "Retainer", s: 180000, m: 350000, l: 650000 },
+      { code: "OX-COM", name: "Коммерциализация на аутсорсе (мес)", group: "Retainer", s: 280000, m: 550000, l: 1000000 },
+      { code: "OX-IT", name: "IT на аутсорсе (мес)", group: "Retainer", s: 90000, m: 200000, l: 380000 },
       { code: "RET-40", name: "Partner Retainer 40 ч/мес", group: "Retainer", s: 120000, m: 120000, l: 120000 },
       { code: "RET-80", name: "Partner Retainer 80 ч/мес", group: "Retainer", s: 220000, m: 220000, l: 220000 },
       { code: "RET-120", name: "Partner Retainer 120 ч/мес", group: "Retainer", s: 300000, m: 300000, l: 300000 },
-      { code: "LOC-001", name: "Диагностика ROMI (SMB)", group: "Локомотив", s: 49000, m: 89000, l: 149000 },
       { code: "FIX-P01", name: "Аудит Яндекс.Директ", group: "Performance", s: 25000, m: 40000, l: 65000 },
       { code: "FIX-P02", name: "Настройка Директ с нуля", group: "Performance", s: 45000, m: 70000, l: 110000 },
       { code: "FIX-S01", name: "Технический SEO-аудит", group: "Поиск / AI / GEO", s: 35000, m: 55000, l: 85000 },
@@ -510,7 +523,7 @@
     ];
 
     const money = n => new Intl.NumberFormat("ru-RU").format(Math.round(n)) + " ₽";
-    let selectedTrigger = "P1";
+    let selectedTrigger = "T2";
     let fixSelected = new Set();
     let atoms = [];
 
@@ -525,6 +538,11 @@
       box.querySelectorAll(".trig").forEach(btn => {
         btn.addEventListener("click", () => {
           selectedTrigger = btn.dataset.id;
+          const trig = TRIGGERS.find(t => t.id === selectedTrigger);
+          if (trig && trig.defaultTier) {
+            document.getElementById("tier").value = trig.defaultTier;
+            document.getElementById("envelope").value = String(TIER[trig.defaultTier].defaultEnvelope);
+          }
           renderTriggers();
           calcLoco();
         });
@@ -540,39 +558,59 @@
       const credit = parseFloat(document.getElementById("credit").value);
       const trig = TRIGGERS.find(t => t.id === selectedTrigger);
 
-      const improShare = envelope * feePct;
-      const mediaProd = envelope - improShare;
+      let improShare = envelope * feePct;
+      const belowMin = improShare < MIN_IMPRO;
+      if (belowMin) improShare = MIN_IMPRO;
+      const mediaProd = Math.max(0, envelope - improShare);
       const creditAmt = improShare * credit;
+      const analytics = improShare * 0.20;
+      const creative = improShare * 0.15;
+      const execution = improShare * 0.55;
+      const pm = improShare * 0.10;
 
-      document.getElementById("locoPrice").innerHTML = `${money(envelope)}<small>один конверт · Impro само решает состав · ${TIER[tier].days}</small>`;
+      document.getElementById("locoPrice").innerHTML = `${money(envelope)}<small>LOC-PILOT · Impro решает состав · ${TIER[tier].days}</small>`;
       document.getElementById("outTier").textContent = TIER[tier].label;
       document.getElementById("outDays").textContent = TIER[tier].days;
       document.getElementById("outTrig").textContent = selectedTrigger;
       document.getElementById("outNext").textContent = MODELS[model];
+      document.getElementById("modulesNote").textContent =
+        `Модули по триггеру: каркас (аналитика+креатив+PM) + ${trig.modules.join(" · ")}`;
 
       document.getElementById("locoComposition").innerHTML = [
         { name: "Пилотный конверт (клиент платит)", id: money(envelope) },
-        { name: `Работа Impro (~${Math.round(feePct*100)}%)`, id: money(improShare) },
+        { name: `Работа Impro (~${Math.round(feePct*100)}%)${belowMin ? " · min 250к" : ""}`, id: money(improShare) },
+        { name: "— аналитика / консалтинг 20%", id: money(analytics) },
+        { name: "— креатив / смысл 15%", id: money(creative) },
+        { name: "— execution модулей 55%", id: money(execution) },
+        { name: "— управление / PM 10%", id: money(pm) },
         { name: "Media / production / прочее", id: money(mediaProd) },
-        { name: "Зачёт работы Impro при расширении", id: money(creditAmt) },
-        { name: "Состав работ", id: "решает Impro под цель" },
+        { name: "Зачёт Impro при продолжении", id: money(creditAmt) },
+        { name: "Модули", id: trig.modules.join(", ") },
         { name: "Next", id: trig.next },
       ].map(a => `<li>${a.name}<span>${a.id}</span></li>`).join("");
 
       document.getElementById("modelNote").textContent =
-        model === "1"
-          ? "После пилота — большой конверт: тот же принцип «бюджет + результат», больше горизонт."
-          : model === "3"
-          ? "После пилота можно остаться на Partner Retainer (часы/задачи) — ваша текущая рабочая модель."
-          : "После пилота — % от бюджета/результата + отдельные статьи.";
+        model === "ox"
+          ? "После decision — подписка OX (К2): постоянный контур функций. Зачёт 100% Impro пилота при старте ≤30д."
+          : model === "k1"
+          ? "После decision — большой конверт / % (К1): тот же принцип «бюджет + результат», больше горизонт."
+          : model === "ret"
+          ? "Partner Retainer (часы) — light-мост. Лучше переводить в OX при первой возможности."
+          : "Узкий B / отдельные FN — не называем партнёрством; мост в A при доверии.";
+
+      document.getElementById("minNote").textContent = belowMin
+        ? `⚠ Impro ниже минимума 250 000 ₽ — в расчёте поднято до минимума. Поднимите конверт или сократите scope.`
+        : `Мин. Impro 250 000 ₽ · мин. конверт при 35% ≈ 715 000 ₽ · канон offers/LOC-PILOT-canon.md`;
 
       window.__locoKP = [
-        `Impro · Пилотный конверт (${TIER[tier].label})`,
-        `Цель: ${trig.id} — ${trig.title}`,
+        `Impro · LOC-PILOT · Пилотный конверт (${TIER[tier].label})`,
+        `Триггер: ${trig.id} — ${trig.title}`,
+        `Цель: ${trig.depth}`,
         `Срок: ${TIER[tier].days}`,
-        `Конверт: ${money(envelope)} (работа Impro ~${money(improShare)}, media/prod ~${money(mediaProd)})`,
-        `Принцип: Impro само определяет состав работ под результат`,
-        `Зачёт работы Impro дальше: ${money(creditAmt)}`,
+        `Конверт: ${money(envelope)} (Impro ~${money(improShare)}, media/prod ~${money(mediaProd)})`,
+        `Модули: каркас + ${trig.modules.join(", ")}`,
+        `Принцип: Impro определяет состав работ под одну бизнес-цель`,
+        `Зачёт Impro при продолжении ≤30д: ${money(creditAmt)}`,
         `Целевая модель после пилота: ${MODELS[model]}`,
       ].join("\n");
     }
@@ -584,7 +622,12 @@
       setTimeout(() => b.textContent = "Скопировать КП-блок", 1200);
     });
 
-    ["tier", "niche", "model", "envelope", "fee", "credit"].forEach(id => {
+    document.getElementById("tier").addEventListener("change", () => {
+      const t = document.getElementById("tier").value;
+      document.getElementById("envelope").value = String(TIER[t].defaultEnvelope);
+      calcLoco();
+    });
+    ["niche", "model", "envelope", "fee", "credit"].forEach(id => {
       document.getElementById(id).addEventListener("change", calcLoco);
     });
 

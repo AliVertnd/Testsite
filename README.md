@@ -29,10 +29,14 @@
 | Рынок: похожие модели и цены | [research/market-peers-outsourced-model.md](research/market-peers-outsourced-model.md) |
 | **Итог к фиксации + готовность холодки** | [docs/cold-readiness-lock.md](docs/cold-readiness-lock.md) |
 | JSON функций для Bitrix/калькулятора | [catalog/functions-pricing.json](catalog/functions-pricing.json) |
+| **Локомотив LOC-PILOT (канон)** | [offers/LOC-PILOT-canon.md](offers/LOC-PILOT-canon.md) |
+| Кальк. локомотива (JSON) | [offers/loc-pilot-calc.json](offers/loc-pilot-calc.json) |
+| Модель всех офферов (КП) | [offers/offers-model.md](offers/offers-model.md) |
+| Актуализация КП под клиента | [offers/kp-actualization.md](offers/kp-actualization.md) |
 | Холодка M0–M3 × локомотив → A | [offers/cold-m0-m3-locomotive.md](offers/cold-m0-m3-locomotive.md) |
 | Архитектура A / B | [docs/agency-offer-architecture.md](docs/agency-offer-architecture.md) |
 | Логика локомотива (холодка) | [offers/locomotive-logic-cold.md](offers/locomotive-logic-cold.md) |
-| Пилотный конверт | [offers/locomotive-pilot-envelope.md](offers/locomotive-pilot-envelope.md) |
+| Пилотный конверт (предыстория) | [offers/locomotive-pilot-envelope.md](offers/locomotive-pilot-envelope.md) |
 | Коммерческие модели | [docs/commercial-models.md](docs/commercial-models.md) |
 | Фикс-пакеты волны 1 | [catalog/06-fixed-services-wave1.md](catalog/06-fixed-services-wave1.md) |
 | Калькулятор | [calculator/index.html](calculator/index.html) |
