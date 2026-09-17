@@ -25,6 +25,7 @@
 
 | Документ | Файл |
 |---|---|
+| **Свод всей деятельности и услуг** | [docs/impro-unified-activity.md](docs/impro-unified-activity.md) |
 | Функции + цены (аутсорс / бюджет) | [catalog/07-functions-responsibility-pricing.md](catalog/07-functions-responsibility-pricing.md) |
 | Рынок: похожие модели и цены | [research/market-peers-outsourced-model.md](research/market-peers-outsourced-model.md) |
 | **Итог к фиксации + готовность холодки** | [docs/cold-readiness-lock.md](docs/cold-readiness-lock.md) |
